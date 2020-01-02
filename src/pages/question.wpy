@@ -1,0 +1,153 @@
+<template>
+  <view class='container'>
+    <view class="content_box">
+      <view class="box">
+        <view class="content"
+              wx:for="{{list}}"
+              wx:for-index="index">
+          <view class="question"
+                bindtap="toggle"
+                data-index="{{index}}">
+            <text>{{item.title}}</text>
+            <image src="../images/arrow_right.png"
+                   mode="scaleToFill"
+                   lazy-load="false"
+                   class="select_img {{isShow[index]&&'select_img_rotate'}}">
+            </image>
+          </view>
+          <view class="line {{isShow[index] ? 'miss':''}}"></view>
+          <view class="answer {{isShow[index] ? 'on' : ''}}">
+            <text>{{item.content}}</text>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import api from '../api/api';
+export default class extends wepy.page {
+  config = {
+    navigationBarTitleText: '常见问题',
+  }
+  props = {}
+  data = {
+    list: [],
+    isShow: [...false],
+  }
+  components = {}
+  methods = {
+    toggle (e) {
+      let Index = e.currentTarget.dataset.index
+      this.isShow[Index] = !this.isShow[Index];
+
+      this.$apply();
+    },
+    toggle2 () {
+      this.isShow2 = !this.isShow2;
+      this.$apply();
+    },
+    toggle3 () {
+      this.isShow3 = !this.isShow3;
+      this.$apply();
+    },
+  }
+  events = {}
+  watch = {}
+  computed = {}
+  async onLoad () {
+
+    const json = await api.question({
+    });
+    if (json.code == 0) {
+      this.list = json.data;
+    } else {
+      tip.error(json.data.msg);
+    }
+    console.log(this.list);
+
+    this.$apply();
+  }
+  onShow () { }
+}
+</script>
+
+<style lang='scss' >
+page {
+  background-color: #f6f7fb;
+}
+.container {
+  .content_box {
+    background-color: #f6f7fb;
+    width: 750rpx;
+    height: 100%;
+    .box {
+      width: 690rpx;
+      height: calc(100vh - 80rpx);
+      position: absolute;
+      z-index: 2;
+      background-color: #fff;
+      margin: 30rpx 30rpx 30rpx 30rpx;
+      .content {
+        .question {
+          // margin-top: 24rpx;
+          margin-left: 30rpx;
+          margin-right: 30rpx;
+          display: flex;
+          flex-direction: row;
+          text {
+            display: inline-block;
+            margin-top: 30rpx;
+            font-size: 28rpx;
+            color: #333333;
+            font-weight: bold;
+          }
+          .select_img {
+            margin-top: 35rpx;
+            // margin-left: 245rpx;
+            position: absolute;
+            right: 60rpx;
+            width: 32rpx;
+            height: 32rpx;
+            display: block;
+            transition: transform 0.3s;
+          }
+          .select_img_rotate {
+            transform: rotate(90deg);
+          }
+        }
+        .line {
+          border-bottom: 1px solid #f1f1f1;
+          margin-top: 30rpx;
+          margin-left: 30rpx;
+          margin-right: 30rpx;
+        }
+        .miss {
+          display: none;
+        }
+        .answer {
+          display: none;
+        }
+
+        .answer.on {
+          display: block;
+          text-overflow: clip;
+          overflow: visible;
+          transition: 0.5s all;
+          text {
+            font-size: 24rpx;
+            color: #999999;
+            margin: 30rpx;
+            display: inline-block;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

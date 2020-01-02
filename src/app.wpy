@@ -1,0 +1,75 @@
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+import {
+  USER_TOKEN,
+  USER_INFO,
+  SYSTEM_INFO,
+  ADDRESS_ID,
+  SEL_CLASS_CODE
+} from "./utils/constant";
+import api from './api/api';
+
+
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/home',
+      'pages/myCourse',
+      'pages/myCourseDetail',
+      'pages/aboutUs',
+      'pages/contactUs',
+      'pages/completeProfile',
+      'pages/signup',
+      'pages/courseDetail',
+      'pages/profile',
+      'pages/notes',
+      'pages/question',
+      'pages/search',
+      'pages/login',
+    ],
+    permission: {
+      "scope.userLocation": {
+        "desc": "你的位置信息将用于地图显示和导航" // 高速公路行驶持续后台定位
+      }
+    },
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTextStyle: 'black',
+    },
+    'tabBar': {
+      'color': '#CCCCCC',
+      'selectedColor': '#FFCC00',
+      'backgroundColor': '#ffffff',
+      'borderStyle': 'white',
+      'list': [{
+        'pagePath': 'pages/home',
+        'text': '首页',
+        'iconPath': 'images/home.png',
+        'selectedIconPath': 'images/home_active.png'
+      }, {
+        'pagePath': 'pages/profile',
+        'text': '我的',
+        'iconPath': 'images/profile.png',
+        'selectedIconPath': 'images/profile_active.png'
+      }]
+    },
+
+  }
+
+  globalData = {
+    userInfo: null
+  }
+
+  constructor() {
+    super()
+    this.use('requestfix')
+    this.use('promisify');
+  }
+
+
+}
+</script>

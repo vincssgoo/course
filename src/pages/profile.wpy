@@ -1,0 +1,461 @@
+<template>
+  <view class='container'>
+    <view class="top">
+      <view class="topTitle">
+        <text>个人中心</text>
+      </view>
+      <view class="bg">
+        <image src="http://img.mvp45.com/bg_profile.png"
+               class="bg_img"></image>
+      </view>
+      <view class="info">
+        <view class="avatar">
+          <image src="{{userinfo.avatar}}"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+        </view>
+        <view class="nickname">
+          <text>{{userinfo.nickname}}</text>
+        </view>
+      </view>
+
+    </view>
+
+    <view class="box"
+          bindtap="goComplete">
+      <view class="content">
+        <view class="icon">
+          <image src="../images/profile/mes@3x.png"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+        </view>
+        <view class="title">
+          <text>完善个人信息</text>
+        </view>
+        <view class='arrow'></view>
+      </view>
+
+      <view class="line"></view>
+    </view>
+
+    <view class="box2"
+          bindtap="goMyCourse">
+      <view class="content2">
+        <view class="icon2">
+          <image src="../images/profile/course@3x.png"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+        </view>
+        <view class="title2">
+          <text>我购买的课程</text>
+        </view>
+        <view class='arrow2'></view>
+      </view>
+      <view class="line"></view>
+    </view>
+
+    <view class="box3"
+          bindtap="goAboutUs">
+      <view class="content3">
+        <view class="icon3">
+          <image src="../images/profile/aboutus@3x.png"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+        </view>
+        <view class="title3">
+          <text>关于我们</text>
+        </view>
+        <view class='arrow3'></view>
+      </view>
+      <view class="line"></view>
+    </view>
+
+    <view class="modalDlg"
+          wx:if="{{showModal}}">
+      <view class="modal_content">
+        <text>未完善个人信息!</text>
+        <view class="content_btn">
+          <button class="btn_cancel"
+                  bindtap="close_mask">取消</button>
+          <button class="btn_confirm"
+                  bindtap="goComplete">去完善</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="mask"
+          catchtouchmove="preventTouchMove"
+          wx:if="{{showModal}}"></view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import api from '../api/api';
+import {
+  USER_TOKEN,
+  USER_INFO,
+  SHOW_MODAL
+} from '../utils/constant';
+
+export default class extends wepy.page {
+  config = {
+    navigationStyle: 'custom',
+    // navigationBarTitleText: '我的',
+    // disableScroll: ,
+  }
+  props = {}
+  data = {
+    list: [],
+    showModal: false,
+    userinfo: [],
+    info: [],
+  }
+  components = {}
+  methods = {
+    showModal () {
+      this.showModal = true
+      this.$apply();
+    },
+
+    close_mask () {
+      this.showModal = false
+      this.$apply();
+    },
+    goComplete () {
+      console.log(123);
+      console.log(this.userinfo);
+      this.info = wepy.getStorageSync(USER_INFO)
+      wepy.navigateTo({ url: './completeProfile?userinfo=' + JSON.stringify(this.info) });
+    },
+    goMyCourse () {
+      console.log(234);
+      wepy.navigateTo({ url: './myCourse' });
+    },
+    goAboutUs () {
+      console.log(345);
+      wepy.navigateTo({ url: './aboutUs' });
+    },
+  }
+  events = {}
+  watch = {}
+  computed = {}
+  onLoad () {
+
+  }
+  onShow () {
+    this.userinfo = wepy.getStorageSync(USER_INFO) || null;
+    if (this.userinfo == null) {
+      wepy.navigateTo({ url: './login' });
+    }
+    else if (this.userinfo) {
+      console.log(666);
+      let flag = wepy.getStorageSync(SHOW_MODAL) || false;
+      this.showModal = flag
+      console.log(this.showModal);
+
+    }
+
+    // const json = await api.getUserInfo({
+    // });
+    // if (json.code == 0) {
+    //   this.list = json.data;
+    // } else {
+    //   tip.error(json.data.msg);
+    // }
+    // this.userinfo = wepy.getStorageSync(USER_INFO)
+
+  }
+}
+
+
+</script>
+
+<style lang='scss' >
+page {
+  background-color: #fff5cc;
+}
+.container {
+  background-color: #fff5cc;
+  width: 750rpx;
+  height: 100%;
+  position: relative;
+  .top {
+    .topTitle {
+      position: absolute;
+      z-index: 2;
+      top: 60rpx;
+      left: 308rpx;
+      right: 306rpx;
+      text {
+        font-size: 34rpx;
+        color: #ffffff;
+        font-weight: bold;
+      }
+    }
+
+    .bg {
+      image {
+        width: 750rpx;
+        height: 419rpx;
+        position: relative;
+        z-index: 1;
+      }
+    }
+    .info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      .avatar {
+        image {
+          width: 220rpx;
+          height: 220rpx;
+          position: absolute;
+          border-radius: 50%;
+          top: 218rpx;
+          left: 266rpx;
+          right: 264rpx;
+          z-index: 2;
+        }
+      }
+      .nickname {
+        position: absolute;
+        z-index: 2;
+        top: 456rpx;
+        height: 56rpx;
+        text {
+          font-size: 40rpx;
+          color: #333333;
+          font-weight: bold;
+          line-height: 56rpx;
+        }
+      }
+    }
+  }
+  .box {
+    width: 750rpx;
+    height: 70rpx;
+    position: absolute;
+    z-index: 9;
+    top: 566rpx;
+    .content {
+      // margin-top: 54rpx;
+      display: flex;
+      flex-direction: row;
+
+      // justify-content: space-around;
+
+      .icon {
+        image {
+          margin-left: 30rpx;
+          width: 32rpx;
+          height: 38rpx;
+        }
+      }
+      .icon2 {
+        margin-top: 94rpx;
+      }
+      .icon3 {
+        margin-top: 188rpx;
+      }
+      .title {
+        text {
+          margin-left: 30rpx;
+          font-size: 32rpx;
+          color: #333333;
+        }
+      }
+      .title2 {
+        text {
+          display: inline-block;
+          margin-top: 94rpx;
+        }
+      }
+      .title3 {
+        text {
+          display: inline-block;
+          margin-top: 188rpx;
+        }
+      }
+      .arrow {
+        width: 6px;
+        height: 6px;
+        border-top: 2px solid #000000;
+        border-right: 2px solid #000000;
+        transform: rotate(45deg);
+        margin-left: 410rpx;
+        margin-top: 12rpx;
+      }
+    }
+    .line {
+      border-bottom: 1rpx solid #ffffff;
+      margin: 24rpx 30rpx 24rpx 30rpx;
+    }
+  }
+  .box2 {
+    width: 750rpx;
+    height: 70rpx;
+    position: absolute;
+    z-index: 9;
+    top: 660rpx;
+    .content2 {
+      // margin-top: 54rpx;
+      display: flex;
+      flex-direction: row;
+      .icon2 {
+        // margin-top: 94rpx;
+        image {
+          margin-left: 30rpx;
+          width: 31rpx;
+          height: 38rpx;
+        }
+      }
+      // .icon3 {
+      //   margin-top: 188rpx;
+      // }
+      .title2 {
+        text {
+          display: inline-block;
+          // margin-top: 94rpx;
+          margin-left: 30rpx;
+          font-size: 32rpx;
+          color: #333333;
+        }
+      }
+      .title3 {
+        text {
+          display: inline-block;
+          margin-top: 188rpx;
+        }
+      }
+
+      .arrow2 {
+        margin-top: 110rpx;
+        width: 6px;
+        height: 6px;
+        border-top: 2px solid #000000;
+        border-right: 2px solid #000000;
+        transform: rotate(45deg);
+        margin-left: 410rpx;
+        margin-top: 12rpx;
+      }
+    }
+    .line {
+      border-bottom: 1rpx solid #ffffff;
+      margin: 24rpx 30rpx 24rpx 30rpx;
+    }
+  }
+  .box3 {
+    width: 750rpx;
+    height: 70rpx;
+    position: absolute;
+    z-index: 9;
+    top: 754rpx;
+    .content3 {
+      // margin-top: 54rpx;
+      display: flex;
+      flex-direction: row;
+      .icon3 {
+        image {
+          margin-left: 30rpx;
+          width: 36rpx;
+          height: 36rpx;
+        }
+      }
+      .title3 {
+        text {
+          display: inline-block;
+          font-size: 32rpx;
+          color: #333333;
+          margin-left: 26rpx;
+        }
+      }
+      .arrow3 {
+        width: 6px;
+        height: 6px;
+        border-top: 2px solid #000000;
+        border-right: 2px solid #000000;
+        transform: rotate(45deg);
+        margin-left: 468rpx;
+        margin-top: 12rpx;
+      }
+    }
+    .line {
+      border-bottom: 1rpx solid #ffffff;
+      margin: 24rpx 30rpx 24rpx 30rpx;
+    }
+  }
+  .mask {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #000;
+    z-index: 10;
+    opacity: 0.7;
+  }
+
+  .modalDlg {
+    width: 532rpx;
+    height: 334rpx;
+    position: fixed;
+    top: 450rpx;
+    left: 108rpx;
+    z-index: 99;
+    // position: absolute;
+    // top: 160rpx;
+    // z-index: 9500;
+    background-color: #fff;
+    border-radius: 12rpx;
+    .modal_content {
+      display: flex;
+      flex-direction: column;
+
+      text {
+        font-size: 36rpx;
+        color: #333333;
+        display: inline-block;
+        margin-top: 98rpx;
+        margin-left: 142rpx;
+      }
+      .content_btn {
+        display: flex;
+        flex-direction: row;
+        margin-top: 72rpx;
+        border-radius: 0rpx;
+        .btn_cancel {
+          width: 266rpx;
+          height: 114rpx;
+          background-color: #ffffff;
+          color: #ffcc00;
+          font-size: 36rpx;
+          font-weight: bold;
+          display: inline-block;
+          line-height: 114rpx;
+        }
+        .btn_confirm {
+          display: inline-block;
+          width: 266rpx;
+          height: 114rpx;
+          background-color: #ffcc00;
+          color: #ffffff;
+          font-size: 36rpx;
+          font-weight: bold;
+          text-align: center;
+          line-height: 114rpx;
+          // border-radius: 0px 0px 12px 0px;
+        }
+        button::after {
+          border: none;
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,227 @@
+<template>
+  <view class='container'>
+    <view class="content_box">
+      <view class="box">
+        <view wx:if="{{is_empty==true}}"
+              class="empty">
+          <image src="../images/home/empty.png"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+          <text>空空如也~</text>
+        </view>
+
+        <view wx:elif="{{is_empty==false}}">
+          <view class="inner"
+                wx:for="{{list}}">
+            <view class="content"
+                  bindtap="goDetail"
+                  data-id="{{item.id}}">
+              <view class="content_img">
+                <image src="{{item.image}}"
+                       mode="scaleToFill"
+                       lazy-load="false">
+                </image>
+              </view>
+              <view class="content_detail">
+                <view class="content_title">
+                  <view class="title">
+                    <text>{{item.title}}</text>
+                  </view>
+                  <view class="price">
+                    <text>¥{{item.price}}</text>
+                  </view>
+                </view>
+                <view class="content_loca">
+                  <view class="loca_title">
+                    <text>{{item.site}}</text>
+                  </view>
+                </view>
+                <view class="content_date">
+                  <text class="date">{{item.start_date}} ~ {{item.end_date}}</text>
+                </view>
+              </view>
+
+            </view>
+            <view class="pay_time">
+              <text>购买时间：{{item.order_pay_datetime}}</text>
+            </view>
+          </view>
+        </view>
+
+      </view>
+    </view>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import api from '../api/api';
+export default class extends wepy.page {
+  config = {
+    navigationBarTitleText: '我的课程',
+  }
+  props = {}
+  data = {
+    list: [],
+    is_empty: true,
+  }
+  components = {}
+  methods = {
+    goDetail (e) {
+      let id = e.currentTarget.dataset.id;
+      wepy.navigateTo({ url: './myCourseDetail?id=' + id });
+
+    },
+  }
+  events = {}
+  watch = {}
+  async getMyCourse () {
+    let json = await api.getMyCourse({
+    })
+    console.log(json);
+
+    if (json.code == 0) {
+      this.list = json.data
+    } else {
+      tip.error(json.data.msg);
+    }
+    if (this.list.length == 0) {
+      //暂无数据
+      this.is_empty = true;
+    }
+    else {
+      this.is_empty = false;
+    }
+    console.log(this.list);
+    this.$apply()
+  }
+  computed = {}
+  onLoad () {
+    this.getMyCourse();
+  }
+  onShow () {
+
+  }
+}
+</script>
+
+<style lang='scss' >
+page {
+  background-color: #f6f7fb;
+}
+.container {
+  .content_box {
+    .box {
+      background-color: #f6f7fb;
+      width: 750rpx;
+      height: 100%;
+      position: absolute;
+      z-index: 2;
+      .inner {
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        width: 690rpx;
+        height: 278rpx;
+        margin-top: 30rpx;
+        margin-left: 30rpx;
+        margin-right: 30rpx;
+        .content {
+          display: flex;
+          flex-direction: row;
+          .content_img {
+            image {
+              width: 184rpx;
+              height: 184rpx;
+              margin: 20rpx 0 0 20rpx;
+            }
+          }
+          .content_detail {
+            display: flex;
+            flex-direction: column;
+            .content_title {
+              display: flex;
+              flex-direction: row;
+              margin-top: 40rpx;
+              margin-left: 20rpx;
+              .title {
+                text {
+                  font-size: 36rpx;
+                  color: #222222;
+                  font-weight: bold;
+                }
+              }
+              .price {
+                margin-left: 134rpx;
+                position: absolute;
+                right: 60rpx;
+                text {
+                  font-size: 36rpx;
+                  color: #e80020;
+                  font-weight: bold;
+                }
+              }
+            }
+            .content_loca {
+              display: flex;
+              flex-direction: row;
+              margin-top: 16rpx;
+              margin-left: 20rpx;
+
+              .loca_title {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                width: 400rpx;
+                text {
+                  font-size: 24rpx;
+                  color: #666666;
+                }
+              }
+            }
+            .content_date {
+              display: flex;
+              flex-direction: row;
+              margin-top: 20rpx;
+              margin-left: 20rpx;
+              .date {
+                font-size: 24rpx;
+                color: #666666;
+              }
+            }
+          }
+        }
+        .pay_time {
+          margin-top: 8rpx;
+          margin-left: 20rpx;
+          text {
+            font-size: 24rpx;
+            color: #666666;
+            letter-spacing: 2rpx;
+          }
+        }
+      }
+      .empty {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        image {
+          width: 270rpx;
+          height: 241rpx;
+          margin-top: 286rpx;
+          display: inline-block;
+        }
+        text {
+          font-size: 24rpx;
+          color: #ffcc00;
+          margin-top: 24rpx;
+          display: inline-block;
+        }
+      }
+    }
+  }
+}
+</style>

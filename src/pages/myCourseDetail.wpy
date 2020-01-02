@@ -1,0 +1,826 @@
+<template>
+  <view class='container'>
+    <view class="top_title1">
+      <image src="../images/left-can.png"
+             mode="scaleToFill"
+             lazy-load="false"
+             bindtap="backList">
+      </image>
+      <text>{{list.course_site.name}}</text>
+    </view>
+    <view class="top">
+      <image src="{{list.image}}"
+             mode="scaleToFill"
+             lazy-load="false">
+      </image>
+    </view>
+    <view class="box">
+      <view class="box_top">
+        <view class="top_detail">
+          <view class="top_decoration">
+
+          </view>
+          <view class="top_title">
+            <text>{{list.title}}</text>
+          </view>
+          <view class="top_price">
+            <text>¥{{list.price}}</text>
+          </view>
+        </view>
+        <view class="top_date">
+          <text>报名起止：{{list.enroll_start_date}}~{{list.enroll_end_date}}</text>
+        </view>
+        <view class="line"></view>
+      </view>
+      <view class="box_center">
+        <view class="center_type">
+          <view class="{{isChange?'type_calendar' :'calendar_hide'}}"
+                bindtap="calendarClick">
+            <text>日历模式</text>
+          </view>
+          <view class="{{isShow?'table_show':'type_table'}}"
+                bindtap="tableClick"
+                data-arr="{{courseData}}">
+            <text>列表模式</text>
+          </view>
+
+        </view>
+        <view class="{{isChange?'calendar':'hide'}}">
+          <wepyCalendar :courseDate.sync="calendarDate"
+                        :startDate.sync="startDate"
+                        :endDate.sync="endDate"
+                        wx:if="{{calendarDate}}"></wepyCalendar>
+          <view class="tip">
+            <view class="hasCourse">
+              <view class="circle_hasCourse"></view>
+              <view class="title_hasCourse">
+                <text>有课</text>
+              </view>
+            </view>
+            <view class="today">
+              <view class="circle_today"></view>
+              <view class="title_today">
+                <text>今日</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="{{isShow?'list':'hide'}}">
+          <swiper class="{{(length<=5)?'swiper_small':'swiper'}} "
+                  indicator-active-color="{{indicatorActiveColor}}"
+                  indicator-dots="{{indicatorDots}}"
+                  circular="true">
+            <swiper-item v-if="courseData.length<=5">
+              <block wx:for="{{courseData}}"
+                     wx:key="key">
+                <view class="content_date">
+                  <text class="date_item">{{item}}</text>
+                </view>
+              </block>
+            </swiper-item>
+            <swiper-item v-else-if="courseData.length>5"
+                         wx:for="{{totalArr.length}}"
+                         wx:for-index="Index">
+              <block wx:for="{{totalArr[Index]}}"
+                     wx:for-index="index"
+                     wx:key="key">
+                <view class="content_date">
+                  <text class="date_item">{{item}}</text>
+                </view>
+              </block>
+            </swiper-item>
+          </swiper>
+        </view>
+
+        <view class="line"></view>
+        <view class="on">
+          <view class="detail_content">
+            <image src="../images/courseDetail/date@3x.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+            <text>课程周期：{{list.start_date}} ~ {{list.end_date}}</text>
+          </view>
+          <view class="detail_content">
+            <image src="../images/courseDetail/time@3x.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+            <text>上课时间：{{list.start_time}}-{{list.end_time}}</text>
+          </view>
+          <view class="detail_content">
+            <image src="../images/courseDetail/type@3x.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+            <text>科目类型：{{list.course_type.name}}</text>
+          </view>
+          <view class="detail_content">
+            <image src="../images/courseDetail/tel@3x.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+            <text bindtap="makeCall">联系电话：{{list.phone}}</text>
+          </view>
+          <view class="detail_content">
+            <image src="../images/courseDetail/address@3x.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+            <text bindtap="getLocation">地址：{{list.address_desc}}</text>
+          </view>
+          <view class="line2"></view>
+        </view>
+      </view>
+      <view class="box_bottom">
+        <view class="bottom_detail">
+          <view class="bottom_decoration">
+
+          </view>
+          <view class="bottom_title">
+            <text>详细介绍</text>
+          </view>
+        </view>
+        <view class="bottom_desc">
+          <html2wxml :parserName="name"
+                     :parserContent.sync="content"></html2wxml>
+        </view>
+
+      </view>
+    </view>
+
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import wepyCalendar from '../components/calendar'
+import api from '../api/api';
+import tip from '../utils/tip.js'
+import html2wxml from '../components/html2wxml';
+import {
+  USER_TOKEN,
+  USER_INFO,
+  SHOW_MODAL
+} from '../utils/constant';
+
+export default class extends wepy.page {
+  config = {
+    navigationStyle: 'custom',
+
+  }
+  props = {}
+  data = {
+    showModal: false,
+    indicatorDots: true,
+    length: null,
+    indicatorActiveColor: "#FFCC00",
+    isCan: true,
+    isChange: true,
+    isShow: false,
+    currentDate: "",
+    calendarDate: [],
+    test: ['2019-12-12'],
+    courseData: [],
+    newArr: [],
+    totalArr: [],
+    date: { year: [], month: [], day: [] }
+    ,
+    startDate: '2018-01-01',
+    endDate: '2021-01-01',
+    id: '',
+    list: [],
+    content: '',
+    latitude: null,
+    longitude: null,
+  }
+  components = {
+    wepyCalendar,
+    html2wxml
+  }
+  checkLength (arr) {
+    if (arr.length <= 5) {
+
+      this.indicatorDots = false;
+      return arr;
+    }
+    else if (arr.length > 5) {
+
+      this.newArr = arr.splice(4, arr.length - 5)
+      this.totalArr.push(this.newArr)
+
+      if (this.newArr.length > 5) {
+        this.checkLength(this.newArr)
+      }
+
+    }
+    this.$apply();
+  }
+  async getCourseDetail () {
+    const json = await api.getCourseDetail({
+      data: {
+        id: this.id,
+      }
+    });
+    if (json.code == 0) {
+      this.list = json.data;
+      this.content = this.list.desc
+      this.latitude = this.list.latitude
+      this.longitude = this.list.longitude
+      console.log(this.latitude);
+      console.log(this.longitude);
+
+
+    } else {
+      tip.error(json.data.msg);
+    }
+
+    this.$apply();
+    this.$invoke('html2wxml', 'htmlParserNotice');
+  }
+  getCalendarDate () {
+
+    for (let i = 0; i < this.list.course_date.length; i++) {
+      this.calendarDate.push(this.list.course_date[i].date)
+    }
+    this.$apply();
+  }
+  getCourseData () {
+    let arr = this.list.course_date;
+    for (let i = 0; i < arr.length; i++) {
+      this.date.year[i] = new Date(arr[i].date).getFullYear();
+      this.date.month[i] = new Date(arr[i].date).getMonth() + 1
+      if (this.date.month[i] >= 1 && this.date.month[i] <= 9) {
+        this.date.month[i] = "0" + this.date.month[i];
+      }
+
+      this.date.day[i] = new Date(arr[i].date).getDate()
+      if (this.date.day[i] >= 0 && this.date.day[i] <= 9) {
+        this.date.day[i] = "0" + this.date.day[i];
+      }
+      let str = this.date.year[i] + '年' + this.date.month[i] + '月' + this.date.day[i] + '日'
+      this.courseData.push(str)
+    }
+    this.length = this.courseData.length
+
+  }
+  methods = {
+    backList () {
+      wepy.navigateBack({
+        delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+      });
+
+    },
+    getLocation: function () {
+      console.log(this.list.latitude);
+
+      wepy.openLocation({//​使用微信内置地图查看位置。
+        latitude: parseInt(this.latitude),//要去的纬度-地址
+        longitude: parseInt(this.longitude),//要去的经度-地址
+        // name: "O'MALL华侨城商业中心",
+        // address: this.list.address_desc
+      })
+    },
+    makeCall () {
+      wepy.makePhoneCall({
+        phoneNumber: this.list.phone,
+        success: function () {
+          console.log('拨打成功');
+
+        },
+        fail: function () {
+          console.log('拨打失败');
+
+        }
+      });
+
+    },
+    pay () {
+      let show_modal = null;
+      api.pay({
+        data: {
+          course_id: this.list.id
+        },
+        method: 'POST',
+      }).then(res => {
+        wepy.requestPayment(res.data).then((res) => {
+          tip.toast('支付成功', 1200)
+          setTimeout(() => {
+            wepy.navigateTo({ url: './myCourse' });
+
+          }, 1200)
+        }).catch(() => {
+          tip.error('支付失败')
+        })
+        this.$apply();
+
+
+
+      }).catch(err => {
+
+        if (err.code == 40001) {
+          wepy.switchTab({ url: './profile' });
+          wepy.setStorageSync(SHOW_MODAL, 'true')
+        }
+      })
+
+    },
+    showModal () {
+      let userinfo = wepy.getStorageSync(USER_INFO) || null;
+      if (userinfo == null) {
+        wepy.navigateTo({ url: './login' });
+      } else {
+        this.showModal = true
+      }
+
+      this.$apply();
+    },
+
+    close_mask () {
+      this.showModal = false
+      this.$apply();
+    },
+    calendarClick () {
+      this.isChange = true;
+      this.isShow = false;
+      this.$apply();
+    },
+
+    tableClick (event) {
+      this.isShow = true;
+      this.isChange = false;
+      // let arr = event.currentTarget.dataset;
+      // tableClick()
+      // if (this.courseDate.length <= 5) {
+      //   this.indicatorDots = false;
+      // }
+      // this.checkLength(arr);
+
+      this.checkLength(this.courseData)
+      this.$apply();
+    },
+
+  }
+  events = {
+    // calChangeSelectedDay: function (date, moduleId, e) {
+    //   this.isOn = false;
+    //   let arr = this.courseDate;
+    //   for (let i = 0; i < arr.length; i++) {
+    //     if (date == arr[i]) {
+    //       this.isOn = true;
+    //       this.$apply();
+    //     }
+    //   }
+    // },
+  }
+  watch = {}
+  computed = {}
+  onLoad (options) {
+    this.id = options.id;
+
+
+  }
+  async onShow () {
+    await this.getCourseDetail()
+    // if (this.list.enroll_status == 'normal') {
+    //   this.isCan = true
+    // }
+    // else if (this.list.enroll_status == 'late') {
+    //   this.isCan = false
+    // }
+    await this.getCalendarDate()
+    await this.getCourseData()
+
+    this.$broadcast("startRenderCalendar");
+  }
+}
+</script>
+
+<style lang='scss' >
+.container {
+  width: 750rpx;
+  height: 100%rpx;
+  background-color: #fff;
+  .top_title1 {
+    margin-top: 38rpx;
+    width: 750rpx;
+    height: 88rpx;
+    text-align: center;
+    image {
+      width: 30rpx;
+      height: 30rpx;
+      margin-left: 42rpx;
+      float: left;
+      margin-top: 30rpx;
+    }
+    text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-left: -42rpx;
+      font-size: 34rpx;
+      color: #232323;
+      font-weight: bold;
+      line-height: 88rpx;
+      text-align: left;
+      display: inline-block;
+      width: 250rpx;
+    }
+  }
+  .top {
+    width: 750rpx;
+    height: 440rpx;
+    position: relative;
+    image {
+      position: absolute;
+      z-index: 1;
+      top: 0rpx;
+      width: 750rpx;
+      height: 440rpx;
+    }
+  }
+  .box {
+    background-color: #ffffff;
+    width: 750rpx;
+    height: 100%;
+    border-radius: 40rpx 40rpx 0 0;
+    position: absolute;
+    top: 500rpx;
+    z-index: 2;
+    .box_top {
+      display: flex;
+      flex-direction: column;
+      .top_detail {
+        display: flex;
+        flex-direction: row;
+        margin-top: 30rpx;
+        margin-left: 30rpx;
+        .top_decoration {
+          width: 10rpx;
+          height: 50rpx;
+          background-color: #ffcc00;
+        }
+        .top_title {
+          margin-left: 30rpx;
+          text {
+            font-size: 36rpx;
+            color: #222222;
+            font-weight: bold;
+          }
+        }
+        .top_price {
+          position: absolute;
+          right: 60rpx;
+          text {
+            font-size: 40rpx;
+            color: #e80020;
+            font-weight: bold;
+          }
+        }
+      }
+      .top_date {
+        margin-top: 30rpx;
+        margin-left: 30rpx;
+        text {
+          font-size: 24rpx;
+          color: #666666;
+        }
+      }
+      .line {
+        width: 750rpx;
+        height: 12rpx;
+        margin-top: 30rpx;
+        background-color: #f6f7fb;
+      }
+    }
+    .box_center {
+      .center_type {
+        display: flex;
+        flex-direction: row;
+        margin-top: 40rpx;
+        .type_calendar {
+          margin-left: 136rpx;
+          width: 160rpx;
+          height: 60rpx;
+          background-color: #ffcc00;
+          border-radius: 30rpx;
+          transition: 0.4s all;
+          text {
+            display: inline-block;
+            padding: 10rpx 24rpx;
+            font-size: 28rpx;
+            color: #ffffff;
+            font-weight: bold;
+            text-align: center;
+          }
+        }
+        .calendar_hide {
+          margin-left: 160rpx;
+          margin-top: 8rpx;
+          width: 160rpx;
+          height: 40rpx;
+          background-color: #fff;
+          border-radius: 0rpx;
+          // padding: 10rpx 24rpx;
+          text {
+            display: inline-block;
+            // padding: 10rpx 24rpx;
+            font-size: 28rpx;
+            color: #333333;
+            font-weight: bold;
+            text-align: center;
+          }
+        }
+        .type_table {
+          margin-left: 182rpx;
+          margin-top: 6rpx;
+          width: 160rpx;
+          height: 40rpx;
+          background-color: #fff;
+          border-radius: 0;
+          text {
+            display: inline-block;
+            // padding: 10rpx 24rpx;
+            font-size: 28rpx;
+            color: #333333;
+            font-weight: bold;
+            text-align: center;
+          }
+        }
+        .table_show {
+          margin-left: 134rpx;
+          width: 160rpx;
+          height: 60rpx;
+          background-color: #ffcc00;
+          border-radius: 30rpx;
+          transition: 0.4s all;
+
+          text {
+            display: inline-block;
+            padding: 10rpx 24rpx;
+            font-size: 28rpx;
+            color: #ffffff;
+            font-weight: bold;
+            text-align: center;
+          }
+        }
+      }
+      .calendar {
+        .tip {
+          display: flex;
+          flex-direction: row;
+          margin-top: 40rpx;
+          .hasCourse {
+            margin-left: 212rpx;
+            display: flex;
+            flex-direction: row;
+            .circle_hasCourse {
+              width: 32rpx;
+              height: 32rpx;
+              border-radius: 50%;
+              background-color: #ffcc00;
+            }
+            .title_hasCourse {
+              margin-left: 10rpx;
+              font-size: 28rpx;
+              color: #333333;
+              font-weight: bold;
+            }
+          }
+          .today {
+            margin-left: 128rpx;
+            display: flex;
+            flex-direction: row;
+            .circle_today {
+              width: 32rpx;
+              height: 32rpx;
+              border-radius: 50%;
+              background-color: #feeba1;
+            }
+            .title_today {
+              margin-left: 10rpx;
+              font-size: 28rpx;
+              color: #333333;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+      .list {
+        .swiper {
+          height: 550rpx;
+          .content_date {
+            display: flex;
+            flex-direction: column;
+            margin-top: 50rpx;
+            margin-left: 60rpx;
+            .date_item {
+              display: inline-block;
+              font-size: 28rpx;
+              color: #333333;
+              font-weight: bold;
+            }
+          }
+        }
+        .swiper_small {
+          // height: 100%;
+          .content_date {
+            display: flex;
+            flex-direction: column;
+            margin-top: 50rpx;
+            margin-left: 60rpx;
+            .date_item {
+              display: inline-block;
+              font-size: 28rpx;
+              color: #333333;
+              font-weight: bold;
+            }
+          }
+        }
+        /* 默认指示点的样式 */
+      }
+      .hide {
+        display: none;
+      }
+      .line {
+        width: 750rpx;
+        height: 12rpx;
+        margin-top: 54rpx;
+        background-color: #f6f7fb;
+      }
+      .detail {
+        display: none;
+      }
+      .on {
+        .detail_content {
+          display: flex;
+          flex-direction: row;
+
+          image {
+            margin-top: 38rpx;
+            margin-left: 30rpx;
+            width: 26rpx;
+            height: 24rpx;
+          }
+          text {
+            margin-top: 30rpx;
+            margin-left: 10rpx;
+            font-size: 28rpx;
+            color: #666666;
+          }
+        }
+        .line2 {
+          width: 750rpx;
+          height: 12rpx;
+          margin-top: 30rpx;
+          background-color: #f6f7fb;
+        }
+      }
+    }
+    .box_bottom {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      .bottom_detail {
+        display: flex;
+        flex-direction: row;
+        margin-top: 30rpx;
+        margin-left: 30rpx;
+        .bottom_decoration {
+          width: 10rpx;
+          height: 50rpx;
+          background-color: #ffcc00;
+        }
+        .bottom_title {
+          margin-left: 30rpx;
+          text {
+            font-size: 36rpx;
+            color: #222222;
+            font-weight: bold;
+          }
+        }
+      }
+      .bottom_desc {
+        display: inline-block;
+        margin-top: 38rpx;
+        // margin-left: 30rpx;
+        margin-bottom: 198rpx;
+        font-size: 28rpx;
+        color: #666666;
+        image {
+          margin-left: 0;
+          width: 750rpx;
+          height: 368rpx;
+        }
+      }
+      .btn_img {
+        position: fixed;
+        bottom: 0;
+        image {
+          width: 750rpx;
+          height: 198rpx;
+        }
+      }
+    }
+  }
+  .mask {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #000;
+    z-index: 10;
+    opacity: 0.7;
+  }
+
+  .modalDlg {
+    width: 532rpx;
+    height: 334rpx;
+    position: fixed;
+    top: 450rpx;
+    left: 108rpx;
+    z-index: 99;
+    // position: absolute;
+    // top: 160rpx;
+    // z-index: 9500;
+    background-color: #fff;
+    // border-radius: 12rpx;
+    .modal_content {
+      display: flex;
+      flex-direction: column;
+      text {
+        font-size: 36rpx;
+        color: #333333;
+        display: inline-block;
+        margin-top: 98rpx;
+        margin-left: 142rpx;
+      }
+      .content_btn {
+        display: flex;
+        flex-direction: row;
+        // margin-top: 72rpx;
+        .btn_cancel {
+          width: 266rpx;
+          height: 114rpx;
+          background-color: #ffffff;
+          border-top: 1rpx solid #cccccc;
+          margin-top: 76rpx;
+          // display: flex;
+
+          text {
+            margin-left: 95rpx;
+            // justify-content: center;
+            // align-items: center;
+            margin-top: 0rpx;
+            color: #ffcc00;
+            font-size: 36rpx;
+            font-weight: bold;
+            display: inline-block;
+            line-height: 114rpx;
+          }
+        }
+        .btn_confirm {
+          width: 268rpx;
+          height: 115rpx;
+          background-color: #ffcc00;
+          margin-top: 76rpx;
+          text {
+            margin-top: 0rpx;
+            margin-left: 98rpx;
+            color: #ffffff;
+            font-size: 36rpx;
+            font-weight: bold;
+            display: inline-block;
+            line-height: 114rpx;
+          }
+        }
+      }
+    }
+  }
+}
+</style>
+<style lang="less">
+.swiper {
+  position: relative;
+  .wx-swiper-dots.wx-swiper-dots-horizontal {
+    margin-bottom: 30rpx;
+  }
+  .wx-swiper-dot {
+    width: 16rpx;
+    height: 16rpx;
+    background: #cccccc;
+    opacity: 0.5;
+  }
+  .wx-swiper-dot-active {
+    width: 28rpx;
+    height: 16rpx;
+    border-radius: 10rpx;
+    opacity: 1;
+  }
+  .wx-swiper-dot-active::before {
+    background: rgba(244, 0, 0, 0.8);
+  }
+}
+</style>

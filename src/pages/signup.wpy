@@ -1,0 +1,485 @@
+<template>
+  <view class='container'>
+    <view class='select_box'>
+      <view class="left">
+        <view class='select'>
+          <picker bindchange="selectTap"
+                  value="{{index2}}"
+                  range="{{array2}}"
+                  class="picker_content">
+            <view class="picker">
+              <text>{{isShow2?array2[index2]:'分点'}}</text>
+            </view>
+          </picker>
+          <view class="arrow_img ">
+            <image src="../images/arrow-up.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+          </view>
+          <view class="line"></view>
+        </view>
+      </view>
+      <view class="center">
+        <view class='select'>
+          <picker bindchange="selectTap2"
+                  value="{{index}}"
+                  range="{{array}}"
+                  class="picker_content">
+            <view class="picker">
+              <text>{{isShow?array[index]:'科目'}}</text>
+            </view>
+          </picker>
+          <view class="arrow_img">
+            <image src="../images/arrow-up.png"
+                   mode="scaleToFill"
+                   lazy-load="false">
+            </image>
+          </view>
+          <view class="line2"></view>
+        </view>
+      </view>
+      <view class="right"
+            bindtap="goSearch">
+        <image src="../images/home/search.png"
+               mode="scaleToFill"
+               lazy-load="false">
+        </image>
+      </view>
+    </view>
+    <view class="content_box">
+      <view class="box">
+        <view wx:if="{{is_empty==true}}"
+              class="empty">
+          <image src="../images/home/empty.png"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+          <text>空空如也~</text>
+        </view>
+        <view wx:elif="{{is_empty==false}}">
+          <view class="content"
+                wx:for="{{list}}"
+                wx:for-index="index"
+                bindtap="goDetail"
+                data-id="{{item.id}}">
+            <view class="content_img">
+              <image src="{{item.image}}"
+                     mode="scaleToFill"
+                     lazy-load="false">
+              </image>
+            </view>
+            <view class="content_detail">
+              <view class="content_title">
+                <view class="title">
+                  <text>{{item.title}}({{item.enroll_amount}}/{{item.volume}})</text>
+                </view>
+                <view class="price">
+                  <text>¥{{item.price}}</text>
+                </view>
+              </view>
+              <view class="content_loca">
+                <view class="loca_title">
+                  <text>{{item.course_site.name}}</text>
+                </view>
+              </view>
+              <view class="content_date">
+                <text class="date">{{item.start_date}} ~ {{item.end_date}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+      </view>
+    </view>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import api from '../api/api';
+import tip from '../utils/tip';
+export default class extends wepy.page {
+  config = {
+    navigationBarTitleText: '课程报名',
+    // disableScrol
+  }
+  props = {}
+  data = {
+    is_empty: false,
+    index: 0,
+    index2: 0,
+    array: ['全部'],
+    array2: ['全部'],
+    isShow: true,
+    isShow2: false,
+    show: false,
+    show2: false,//控制下拉列表的显示隐藏，false隐藏、true显示
+    locationList: [],
+    typeList: [],
+    site_id: '',
+    type_id: '',
+    keyword: '',
+    index: 0,
+    index2: 0,
+    list: [],
+  }
+  components = {}
+  methods = {
+    goSearch () {
+      wepy.navigateTo({ url: './search' });
+    },
+    goDetail (e) {
+      let id = e.currentTarget.dataset.id;
+      console.log(id);
+
+      wepy.navigateTo({ url: './courseDetail?id=' + id });
+
+    },
+    selectTap (e) {
+      this.index2 = e.detail.value
+      this.isShow2 = true
+      if (this.index2 == 0) {
+        this.site_id = ''
+      }
+      else {
+        this.site_id = this.locationList[this.index2 - 1].id
+      }
+      console.log(this.site_id);
+
+      this.$apply();
+      tip.loading('请求中');
+      this.getList()
+      tip.loaded()
+    },
+
+    selectTap2 (e) {
+      this.index = e.detail.value
+      // console.log(this.typeList[this.index].id, );
+      this.isShow = true
+      console.log(this.typeList);
+      console.log(this.index);
+
+      if (this.index == 0) {
+        this.type_id = ''
+      }
+      else {
+        this.type_id = this.typeList[this.index - 1].id
+
+      }
+      console.log(this.type_id);
+
+      this.$apply();
+      tip.loading('请求中');
+      this.getList()
+      tip.loaded()
+    },
+    // 点击下拉列表
+    // optionTap2 (e) {
+    //   let Index = e.currentTarget.dataset.index;//获取点击的下拉列表的下标
+    //   this.index2 = Index;
+    //   this.show2 = !this.data.show2,
+    //     this.isShow2 = true,
+    //     this.type_id = this.typeList.data[this.index2].id,
+    //     this.$apply();
+    //   this.onShow()
+    // },
+  }
+  async getList () {
+    const json = await api.courseList({
+      data: {
+        site_id: this.site_id,
+        type_id: this.type_id,
+        keyword: this.keyword,
+      }
+    });
+    if (json.code == 0) {
+      this.list = json.data;
+      console.log(this.list);
+
+    } else {
+      tip.error(json.data.msg);
+    }
+    if (this.list.length == 0) {
+      //暂无数据
+      this.is_empty = true;
+    }
+    else {
+      this.is_empty = false;
+    }
+    this.$apply()
+  }
+  events = {}
+  watch = {}
+  computed = {}
+  onLoad () { }
+  async onShow () {
+    tip.loading('请求中');
+    await this.getList()
+
+
+    const json2 = await api.locationList({
+      data: {
+        name: ''
+      }
+    });
+
+    if (json2.code == 0) {
+      this.locationList = json2.data.data;
+    } else {
+      tip.error(json2.data.msg);
+    }
+    for (let i = 0; i < this.locationList.length; i++) {
+      this.array2.push(this.locationList[i].name)
+    }
+
+
+    const json3 = await api.typeList({
+      // data: {
+      //   site_id: '',
+      //   type_id: '',
+      //   keyword: '',
+      // }
+    });
+    tip.loaded();
+    if (json3.code == 0) {
+      this.typeList = json3.data.data;
+
+    } else {
+      tip.error(json3.data.msg);
+    }
+    for (let i = 0; i < this.typeList.length; i++) {
+      this.array.push(this.typeList[i].name)
+    }
+    console.log(this.array);
+    // console.log(this.list);
+    // console.log(this.locationList);
+    // console.log(this.typeList);
+
+    this.$apply();
+
+  }
+}
+</script>
+
+<style lang='scss' >
+page {
+  background-color: #f6f7fb;
+}
+.container {
+  width: 750rpx;
+  height: 100%;
+  margin: 0 auto;
+  .select_box {
+    background: #fff;
+    width: 750rpx;
+    height: 84rpx;
+    display: flex;
+    flex-direction: row;
+    .left {
+      position: relative;
+      .select {
+        // box-sizing: border-box;
+        width: 312rpx;
+        height: 70rpx;
+        display: flex;
+        align-items: center;
+        // padding: 0 20rpx;
+        .picker_content {
+          .picker {
+            width: 200rpx;
+            margin-left: 50rpx;
+            color: #cccccc;
+            font-size: 32rpx;
+            text {
+              margin-top: 17rpx;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
+              width: 200rpx;
+              height: 44rpx;
+              display: inline-block;
+            }
+          }
+        }
+
+        .arrow_img {
+          image {
+            width: 48rpx;
+            height: 38rpx;
+            display: block;
+            margin-top: 6rpx;
+            // transition: transform 0.3s;
+            transform: rotate(180deg);
+          }
+        }
+        .img_rotate {
+          transform: rotate(180deg);
+          image {
+            transform: rotate(180deg);
+          }
+        }
+        .line {
+          border-right: 2px solid #f8f8f8;
+          padding: 18rpx 0;
+          margin-top: 8rpx;
+        }
+      }
+    }
+    .center {
+      position: relative;
+      .select {
+        box-sizing: border-box;
+        width: 312rpx;
+        height: 70rpx;
+        display: flex;
+        align-items: center;
+        padding: 0 20rpx;
+        .picker_content {
+          .picker {
+            width: 200rpx;
+            color: #cccccc;
+            font-size: 32rpx;
+            text {
+              margin-top: 17rpx;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
+              width: 200rpx;
+              height: 44rpx;
+              display: inline-block;
+            }
+          }
+        }
+
+        .arrow_img {
+          image {
+            width: 48rpx;
+            height: 38rpx;
+            display: block;
+            margin-top: 6rpx;
+            // transition: transform 0.3s;
+            transform: rotate(180deg);
+          }
+        }
+
+        .line2 {
+          border-right: 2px solid #f8f8f8;
+          padding: 18rpx 0;
+          margin-top: 8rpx;
+          // margin-left: 28rpx;
+        }
+      }
+    }
+    .right {
+      image {
+        width: 36rpx;
+        height: 36rpx;
+        margin-top: 18rpx;
+      }
+    }
+  }
+
+  .content_box {
+    .box {
+      background-color: #f6f7fb;
+      width: 100%;
+      height: 100%;
+
+      .content {
+        background-color: #fff;
+        width: 690rpx;
+        height: 224rpx;
+        margin: 30rpx 30rpx;
+        display: flex;
+        flex-direction: row;
+        .content_img {
+          image {
+            width: 184rpx;
+            height: 184rpx;
+            margin: 20rpx 0 20rpx 20rpx;
+          }
+        }
+        .content_detail {
+          display: flex;
+          flex-direction: column;
+          .content_title {
+            display: flex;
+            flex-direction: row;
+            margin-top: 40rpx;
+            margin-left: 20rpx;
+            .title {
+              text {
+                text-overflow: ellipsis;
+                font-size: 36rpx;
+                color: #222222;
+                font-weight: bold;
+              }
+            }
+            .price {
+              position: absolute;
+              right: 60rpx;
+              text {
+                font-size: 36rpx;
+                color: #e80020;
+                font-weight: bold;
+              }
+            }
+          }
+          .content_loca {
+            display: flex;
+            flex-direction: row;
+            margin-top: 16rpx;
+            margin-left: 20rpx;
+            .loca_icon {
+              image {
+                width: 19rpx;
+                height: 23rpx;
+              }
+            }
+            .loca_title {
+              text-overflow: ellipsis;
+              width: 400rpx;
+              white-space: nowrap;
+              overflow: hidden;
+              text {
+                font-size: 24rpx;
+                color: #666666;
+              }
+            }
+          }
+          .content_date {
+            display: flex;
+            flex-direction: row;
+            margin-top: 20rpx;
+            margin-left: 20rpx;
+            .date {
+              font-size: 24rpx;
+              color: #666666;
+            }
+          }
+        }
+      }
+      .empty {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        image {
+          width: 270rpx;
+          height: 241rpx;
+          margin-top: 286rpx;
+          display: inline-block;
+        }
+        text {
+          font-size: 24rpx;
+          color: #ffcc00;
+          margin-top: 24rpx;
+          display: inline-block;
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,475 @@
+<template>
+  <view class='container'>
+    <view class="tabbar">
+      <view class="icon">
+        <image src="http://img.mvp45.com/logo.png"
+               mode="scaleToFill"
+               lazy-load="false">
+        </image>
+      </view>
+      <view class="search">
+        <view class="searchInput"
+              bindtap="goSearch">
+          <image src="http://img.mvp45.com/search.png"
+                 mode="scaleToFill"
+                 lazy-load="false">
+          </image>
+          <input type="text"
+                 disabled="true"
+                 placeholder="搜索"
+                 placeholder-class="placeholder" />
+        </view>
+      </view>
+    </view>
+    <view class="bgc"></view>
+    <view class="swipper">
+      <view class="bg_swipper">
+        <image src="http://img.mvp45.com/bg_swiper.png"
+               mode="widthFix"
+               lazy-load="false">
+        </image>
+        <view class="img_swipper">
+          <swiper indicator-dots
+                  indicator-color="#F2F2F2"
+                  indicator-active-color="#FFCC00"
+                  autoplay
+                  circular
+                  class="swiper">
+
+            <swiper-item class="swipperItem"
+                         wx:for="{{banner}}">
+              <block>
+                <image src="{{item.image}}"></image>
+              </block>
+            </swiper-item>
+
+          </swiper>
+        </view>
+      </view>
+
+    </view>
+    <view class="bottom">
+      <view class="bg_bottom">
+        <image src="http://img.mvp45.com/bg_bottom.png"
+               lazy-load="false">
+        </image>
+        <view class="box">
+          <view class="bottom_item">
+            <image src="http://img.mvp45.com/item1.png"
+                   bindtap="goSignup"></image>
+            <image src="http://img.mvp45.com/item2.png"
+                   bindtap="goMyCourse"></image>
+            <image src="http://img.mvp45.com/item3.png"
+                   bindtap="goNotice"></image>
+            <image src="http://img.mvp45.com/item4.png"
+                   bindtap="goQuestion"></image>
+            <image src="http://img.mvp45.com/item5.png"
+                   bindtap="goNotes"></image>
+            <image src="http://img.mvp45.com/item6.png"></image>
+            <button open-type="contact"
+                    bindcontact="handleContact"
+                    class="item_btn"></button>
+          </view>
+        </view>
+
+      </view>
+
+    </view>
+
+    <view class="modalDlg"
+          wx:if="{{showModal}}">
+      <view class="model_content">
+        <image src="http://img.mvp45.com/bg_note1.png"
+               mode="scaleToFill"
+               lazy-load="false">
+        </image>
+        <view class="modal_box">
+          <view class="modal_text">
+
+            <scroll-view scroll-y
+                         scroll-with-animation
+                         class="scroll">
+              <text>{{list.data}}</text>
+            </scroll-view>
+            <button bindtap="close_mask"
+                    class="btn">我知道了</button>
+          </view>
+        </view>
+
+      </view>
+
+    </view>
+
+    <view class="mask"
+          catchtouchmove="preventTouchMove"
+          wx:if="{{showModal}}"></view>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import api from '../api/api';
+import tip from '../utils/tip'
+import {
+  USER_TOKEN,
+  USER_INFO
+} from '../utils/constant';
+export default class extends wepy.page {
+  config = {
+    navigationBarTitleText: '教育',
+
+    // disableScroll: ,
+  }
+  props = {}
+  data = {
+    list: [],
+    banner: [],
+    showModal: false,
+    token: ''
+  }
+  components = {}
+
+  methods = {
+    handleContact (e) {
+      console.log(6666);
+
+      console.log(e.detail.path)
+      console.log(e.detail.query)
+    },
+    goSearch () {
+      wepy.navigateTo({ url: './search' });
+    },
+    goSignup () {
+      wepy.navigateTo({ url: './signup' });
+    },
+    goNotes () {
+      wepy.navigateTo({ url: './notes' });
+    },
+    goContactUs () {
+      wepy.navigateTo({ url: './contactUs' });
+    },
+    goQuestion () {
+      wepy.navigateTo({ url: './question' });
+    },
+    goMyCourse () {
+      if (this.token) {
+        wepy.navigateTo({ url: './myCourse' });
+      }
+      else if (this.token == null) {
+        wepy.navigateTo({ url: './login' });
+      }
+
+    },
+    goNotice () {
+      this.showModal = true
+      this.$apply();
+    },
+
+
+    close_mask () {
+      this.showModal = false
+      this.$apply();
+    },
+
+  }
+  events = {}
+  watch = {}
+  computed = {}
+  onLoad () {
+  }
+
+  async onShow () {
+    this.token = wepy.getStorageSync(USER_TOKEN) || null;
+    console.log(this.token);
+    tip.loading('请求中');
+    const json = await api.getBanner({
+    });
+    if (json.code == 0) {
+      this.banner = json.data;
+    } else {
+      tip.error(json.data.msg);
+    }
+    const json1 = await api.getInfo({
+      data: {
+        key: "notice"
+      }
+    });
+    tip.loaded()
+    if (json1.code == 0) {
+      this.list = json1;
+    } else {
+      tip.error(json1.msg);
+    }
+    console.log(this.list);
+    console.log(this.banner);
+
+    this.$apply();
+
+  }
+}
+</script>
+
+<style lang='scss' >
+page {
+  height: 100vh;
+}
+.container {
+  background-color: #fff5cc;
+  height: 100vh;
+  .tabbar {
+    width: 750rpx;
+    height: 120rpx;
+    display: flex;
+    flex-direction: row;
+    background-color: #ffcc00;
+    .icon {
+      image {
+        z-index: 6;
+        width: 92rpx;
+        height: 92rpx;
+        position: absolute;
+        left: 30rpx;
+        top: 14rpx;
+      }
+    }
+
+    .search {
+      z-index: 5;
+      border: none;
+      border-radius: 38rpx;
+      background-color: #fff;
+      width: 568rpx;
+      height: 66rpx;
+      margin-left: 152rpx;
+      margin-top: 32rpx;
+      .searchInput {
+        display: flex;
+        flex-direction: row;
+        image {
+          width: 36rpx;
+          height: 36rpx;
+          padding-left: 30rpx;
+          padding-top: 16rpx;
+        }
+        input {
+          padding-left: 20rpx;
+          padding-top: 14rpx;
+          .placeholder {
+            color: #cccccc;
+            font-size: 28rpx;
+          }
+        }
+      }
+    }
+  }
+  .bgc {
+    z-index: 4;
+    background-color: #ffee06;
+    width: 750rpx;
+    height: 60rpx;
+    position: absolute;
+    top: 60rpx;
+  }
+  .swipper {
+    width: 750rpx;
+    height: 390rpx;
+    position: relative;
+
+    .bg_swipper {
+      position: relative;
+      image {
+        position: absolute;
+        top: 0rpx;
+        left: 0rpx;
+        width: 750rpx;
+        height: 390rpx;
+      }
+    }
+    .img_swipper {
+      .swiper {
+        height: 342rpx;
+        .swipperItem {
+          image {
+            position: absolute;
+            z-index: 5;
+            top: 50rpx;
+            left: 30rpx;
+            width: 690rpx;
+            height: 292rpx;
+          }
+        }
+      }
+    }
+  }
+  .bottom {
+    width: 750rpx;
+    height: calc(100vh - 515rpx);
+    .bg_bottom {
+      position: relative;
+      image {
+        width: 750rpx;
+        height: calc(100vh - 510rpx);
+      }
+      .box {
+        width: 100%;
+        position: absolute;
+        z-index: 50;
+        top: 0;
+        .bottom_item {
+          image:first-child {
+            margin-top: calc((100vh - 600rpx) * 0.1);
+            position: absolute;
+            z-index: 2;
+            height: 270rpx;
+            width: 270rpx;
+          }
+          image:nth-child(4) {
+            margin-top: calc((100vh - 670rpx) * 0.1);
+            position: absolute;
+            z-index: 2;
+            top: calc((100vh - 670rpx) * 0.1 + 240rpx);
+            height: 270rpx;
+            width: 270rpx;
+          }
+          image:nth-child(2) {
+            margin-top: calc((100vh - 600rpx) * 0.1);
+            position: absolute;
+            z-index: 2;
+            height: 270rpx;
+            width: 270rpx;
+            left: 240rpx;
+          }
+          image:nth-child(3) {
+            margin-top: calc((100vh - 600rpx) * 0.1);
+            position: absolute;
+            z-index: 2;
+            height: 270rpx;
+            width: 270rpx;
+            left: 480rpx;
+          }
+          image:nth-child(5) {
+            margin-top: calc((100vh - 670rpx) * 0.1);
+            position: absolute;
+            z-index: 2;
+            height: 270rpx;
+            width: 270rpx;
+            top: calc((100vh - 670rpx) * 0.1 + 240rpx);
+            left: 240rpx;
+          }
+          image:nth-child(6) {
+            margin-top: calc((100vh - 670rpx) * 0.1);
+            position: absolute;
+            z-index: 2;
+            height: 270rpx;
+            top: calc((100vh - 670rpx) * 0.1 + 240rpx);
+            width: 270rpx;
+            left: 480rpx;
+          }
+          .item_btn {
+            position: absolute;
+            z-index: 3;
+            height: 240rpx;
+            top: 240rpx;
+            width: 240rpx;
+            left: 480rpx;
+            opacity: 0;
+          }
+        }
+      }
+    }
+  }
+}
+.mask {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #000;
+  z-index: 9000;
+  opacity: 0.7;
+}
+
+.modalDlg {
+  width: 573rpx;
+  height: 900rpx;
+  position: absolute;
+  top: 160rpx;
+  left: 85rpx;
+  z-index: 9500;
+  background-color: #fff;
+  border-radius: 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .model_content {
+    image {
+      border-radius: 10rpx;
+      width: 574rpx;
+      height: 290rpx;
+    }
+    .modal_box {
+      width: 100%;
+
+      .modal_text {
+        display: flex;
+        flex-direction: column;
+        .scroll {
+          height: 426rpx;
+
+          text {
+            font-size: 24rpx;
+            color: #333333;
+            margin-top: 10rpx;
+            margin-left: 46rpx;
+            display: inline-block;
+            width: 484rpx;
+            height: 426rpx;
+            text-overflow: ellipsis;
+          }
+        }
+
+        .btn {
+          z-index: 100;
+          position: absolute;
+          top: 765rpx;
+          left: 174rpx;
+          width: 226rpx;
+          height: 64rpx;
+          border-radius: 100rpx;
+          font-size: 28rpx;
+          color: #ffffff;
+          line-height: 64rpx;
+          text-align: center;
+          background-image: linear-gradient(to bottom, #ffe32d, #ffb200);
+        }
+      }
+    }
+  }
+}
+</style>
+<style lang="less">
+.swiper {
+  position: relative;
+  .wx-swiper-dots.wx-swiper-dots-horizontal {
+    margin-bottom: 30rpx;
+  }
+  .wx-swiper-dot {
+    width: 16rpx;
+    height: 16rpx;
+    background: rgba(255, 255, 255, 1);
+    opacity: 0.5;
+  }
+  .wx-swiper-dot-active {
+    width: 28rpx;
+    height: 16rpx;
+    border-radius: 10rpx;
+    opacity: 1;
+  }
+  .wx-swiper-dot-active::before {
+    background: rgba(244, 0, 0, 0.8);
+  }
+}
+</style>
