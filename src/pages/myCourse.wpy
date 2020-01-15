@@ -13,12 +13,13 @@
 
         <view wx:elif="{{is_empty==false}}">
           <view class="inner"
-                wx:for="{{list}}">
+                wx:for="{{list}}"
+                wx:for-index="index">
             <view class="content"
                   bindtap="goDetail"
-                  data-id="{{item.id}}">
+                  data-id="{{item.course_snap.id}}">
               <view class="content_img">
-                <image src="{{item.image}}"
+                <image src="{{item.course_snap.image}}"
                        mode="scaleToFill"
                        lazy-load="false">
                 </image>
@@ -26,10 +27,10 @@
               <view class="content_detail">
                 <view class="content_title">
                   <view class="title">
-                    <text>{{item.title}}</text>
+                    <text>{{item.course_snap.title}}</text>
                   </view>
                   <view class="price">
-                    <text>¥{{item.price}}</text>
+                    <text>¥{{item.course_snap.price}}</text>
                   </view>
                 </view>
                 <view class="content_loca">
@@ -38,13 +39,14 @@
                   </view>
                 </view>
                 <view class="content_date">
-                  <text class="date">{{item.start_date}} ~ {{item.end_date}}</text>
+                  <text class="date">{{item.course_snap.start_date}} ~ {{item.course_snap.end_date}}</text>
                 </view>
               </view>
 
             </view>
             <view class="pay_time">
-              <text>购买时间：{{item.order_pay_datetime}}</text>
+              <text>购买时间：{{item.pay_datetime}}</text>
+              <text class="pay_name">{{item.children_snap.name}}</text>
             </view>
           </view>
         </view>
@@ -65,7 +67,8 @@ export default class extends wepy.page {
   props = {}
   data = {
     list: [],
-    is_empty: true,
+    is_empty: false,
+    children_snap: [],
   }
   components = {}
   methods = {
@@ -94,7 +97,7 @@ export default class extends wepy.page {
     else {
       this.is_empty = false;
     }
-    console.log(this.list);
+
     this.$apply()
   }
   computed = {}
@@ -194,12 +197,21 @@ page {
           }
         }
         .pay_time {
+          position: relative;
           margin-top: 8rpx;
           margin-left: 20rpx;
           text {
             font-size: 24rpx;
             color: #666666;
             letter-spacing: 2rpx;
+          }
+          .pay_name {
+            position: absolute;
+            top: 3rpx;
+            right: 30rpx;
+            font-size: 28rpx;
+            color: #333333;
+            font-weight: bold;
           }
         }
       }

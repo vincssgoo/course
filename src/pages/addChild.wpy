@@ -1,0 +1,419 @@
+<template>
+  <view class='container'>
+    <view class="content_box"
+          wx:if="{{is_empty==false}}">
+      <view class="box {{(currentIndex==index)?'hasBorder':'' }}"
+            bindtap="selected"
+            data-id="{{list[index].id}}"
+            data-index="{{index}}"
+            wx:for="{{list.length}}"
+            wx:for-index="index">
+        <view class="content">
+          <view class="title">
+            <text>姓名</text>
+            <input bindinput="bindNameInput"
+                   disabled="true"
+                   type="text"
+                   class="title_input"
+                   placeholder="请填写姓名"
+                   placeholder-class="placeholder"
+                   value="{{list[index].name}}" />
+          </view>
+          <view class="line"></view>
+        </view>
+        <view class="content">
+          <view class="title">
+            <text>电话</text>
+            <input bindinput="bindPhoneInput"
+                   type="text"
+                   disabled="true"
+                   class="title_input"
+                   placeholder="请填写电话号码"
+                   placeholder-class="placeholder"
+                   value="{{list[index].phone}}" />
+          </view>
+          <view class="line"></view>
+        </view>
+        <view class="content">
+          <view class="title">
+            <text>学校</text>
+            <!-- <input bindinput="bindSchoolInput"
+                   type="text"
+                   class="title_input"
+                   placeholder="请填写学校名称"
+                   placeholder-class="placeholder"
+                   value="{{list[0].school}}" /> -->
+            <!-- <picker bindchange="selectTap"
+                    value="{{index2}}"
+                    range="{{array2}}"
+                    class="picker_content">
+              <view class="picker">
+                <text>{{isShow2?array2[index2]:'请选择学校'}}</text>
+              </view>
+            </picker> -->
+            <input value="{{school[index]}}"
+                   disabled="true"
+                   class="title_input"
+                   placeholder="请填写学校名称"
+                   placeholder-class="placeholder"
+                   type="text" />
+          </view>
+          <view class="line"></view>
+        </view>
+        <view class="content">
+          <view class="title">
+            <text>班级</text>
+            <input value="{{class[index]}}"
+                   disabled="true"
+                   class="title_input"
+                   placeholder="请填写班级名称"
+                   placeholder-class="placeholder"
+                   type="text" />
+          </view>
+          <view class="line"></view>
+        </view>
+        <view class="content">
+          <view class="title">
+            <text>身份证号</text>
+            <input bindinput="bindIdInput"
+                   disabled="true"
+                   type="text"
+                   class="title_input"
+                   placeholder="请填写身份证号码"
+                   placeholder-class="placeholder"
+                   value="{{list[index].id_card_number}}" />
+          </view>
+        </view>
+      </view>
+      <view class="childinfo"
+            bindtap="goComplete">
+        <text>管理小孩信息</text>
+      </view>
+      <view class="btn"><button class="btn_cancel"
+                bindtap="cancel">取消</button>
+        <button class="btn_confirm"
+                bindtap="pay">确定</button></view>
+    </view>
+    <view wx:elif="{{is_empty==true}}"
+          class="empty"
+          bindtap="clearEmpty">
+      <image src="../images/add.png"
+             mode="scaleToFill"
+             lazy-load="false">
+      </image>
+      <text>添加小孩信息</text>
+    </view>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import api from '../api/api';
+import tip from '../utils/tip';
+export default class extends wepy.page {
+  config = {
+    navigationBarTitleText: '请选择报名小孩',
+  }
+  props = {}
+  data = {
+    list: null,
+    is_empty: false,
+    isClick: [...false],
+    isShow2: false,
+    array2: ['全部'],
+    index2: 0,
+    keyword: '',
+    schoolList: null,
+    classList: null,
+    school: [],
+    class: [],
+    length: null,
+    children_id: null,
+    course_id: null,
+    currentIndex: 0,
+    id: null,
+    empty: true,
+  }
+  components = {}
+  methods = {
+    clearEmpty () {
+      wepy.navigateTo({ url: './completeProfile?is_empty=false' });
+
+    },
+    selectTap (e) {
+      this.index2 = e.detail.value
+      this.isShow2 = true
+      if (this.index2 == 0) {
+        this.site_id = ''
+      }
+      else {
+        this.site_id = this.schoolList[this.index2 - 1].id
+      }
+      this.$apply();
+
+    },
+    cancel () {
+      wepy.navigateBack({
+        delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+      });
+
+    },
+    selected (e) {
+      // this.isClick[dex] = false
+      let dex = e.currentTarget.dataset.index
+      // if(dex == this.currentIndex){
+      //   this.isClick[dex] = !this.isClick[dex];
+      // }
+      this.currentIndex = dex;
+      let id = e.currentTarget.dataset.id
+      //   console.log(id);
+      this.children_id = id
+      // this.isClick[dex] = !this.isClick[dex];
+      // if (this.isClick[dex] == true) {
+      //   let id = e.currentTarget.dataset.id
+      //   console.log(id);
+
+      //   this.children_id = id
+      // }
+    },
+    goDetail (e) {
+      let id = e.currentTarget.dataset.id;
+      wepy.navigateTo({ url: './myCourseDetail?id=' + id });
+
+    },
+    goComplete () {
+      wepy.navigateTo({ url: './completeProfile' });
+
+    },
+    pay () {
+      console.log(this.children_id);
+      // console.log(this.course_id);
+      api.pay({
+        data: {
+          course_id: this.course_id,
+          children_id: this.children_id
+        },
+        method: 'POST',
+      }).then(res => {
+        wepy.requestPayment(res.data).then((res) => {
+          tip.toast('支付成功', 1200)
+          setTimeout(() => {
+            // wepy.redirectTo({ url: './courseDetail?id=' + this.id });
+            wepy.navigateBack({
+              delta: 2 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+            });
+
+
+
+          }, 1200)
+        }).catch(() => {
+          tip.error('支付失败')
+        })
+        this.$apply();
+      })
+    },
+  }
+  async getSchoolList () {
+    let json2 = await api.getSchoolList({
+      data: {
+        keyword: ''
+      }
+    });
+    if (json2.code == 0) {
+      this.schoolList = json2.data.data;
+    } else {
+      tip.error(json2.data.msg);
+    }
+    console.log(this.list[0].school_id);
+
+    for (let i = 0; i < this.list.length; i++) {
+      for (let j = 0; j < this.schoolList.length; j++) {
+        if (this.list[i].school_id == this.schoolList[j].id) {
+          // this.school.push(this.schoolList[j].name)
+          this.school.splice(i, 1, this.schoolList[j].name)
+
+        }
+      }
+    }
+    console.log(this.school[0]);
+    this.$apply();
+    // for (let i = 0; i < this.schoolList.length; i++) {
+    //   this.array2.push(this.schoolList[i].name)
+    // }
+    // console.log(this.array2);
+  }
+  async getClassList () {
+    let json2 = await api.getClassList({
+      data: {
+        keyword: ''
+      }
+    });
+    if (json2.code == 0) {
+      this.classList = json2.data.data;
+    } else {
+      tip.error(json2.data.msg);
+    }
+    for (let i = 0; i < this.list.length; i++) {
+      for (let j = 0; j < this.classList.length; j++) {
+        if (this.list[i].class_id == this.classList[j].id) {
+          this.class.splice(i, 1, this.classList[j].name)
+        }
+      }
+
+    }
+    this.$apply();
+  }
+  events = {}
+  watch = {}
+  async getChildInfo () {
+    let json = await api.getChildInfo({
+    })
+    if (json.code == 0) {
+      this.list = json.data
+      this.length = this.list.length
+      if (this.length > 0) {
+        this.children_id = this.list[0].id
+      }
+
+    } else {
+      tip.error(json.data.msg);
+    }
+    if (this.list.length == 0) {
+      //暂无数据
+      this.is_empty = true;
+    }
+    else {
+      this.is_empty = false;
+    }
+    console.log(this.list);
+
+    this.$apply()
+  }
+  computed = {}
+  onLoad (options) {
+    this.course_id = options.course_id
+    this.id = options.id
+
+  }
+  async onShow () {
+    tip.loading();
+    await this.getChildInfo();
+    this.getSchoolList();
+    this.getClassList();
+    tip.loaded();
+  }
+}
+</script>
+
+<style lang='scss' >
+page {
+  background-color: #f6f7fb;
+}
+.container {
+  .content_box {
+    position: relative;
+    .box {
+      width: 690rpx;
+      height: 475rpx;
+      // position: absolute;
+      // z-index: 2;
+      background-color: #fff;
+      margin-top: 30rpx;
+      margin-right: 26rpx;
+      margin-left: 34rpx;
+      .content {
+        .title {
+          display: flex;
+          flex-direction: row;
+          margin-left: 30rpx;
+
+          text {
+            font-size: 32rpx;
+            color: #333333;
+            display: inline-block;
+            // padding-top: 30rpx;
+            font-weight: bold;
+            margin-top: 30rpx;
+          }
+          .title_input {
+            font-size: 32rpx;
+            color: #333333;
+            font-weight: bold;
+            margin-left: 36rpx;
+            margin-top: 30rpx;
+          }
+          .placeholder {
+            font-size: 28rpx;
+            color: #dcdcdc;
+            font-weight: normal;
+          }
+        }
+        .line {
+          border-bottom: 1px solid #f1f1f1;
+          margin-top: 20rpx;
+          margin-left: 30rpx;
+          margin-right: 30rpx;
+        }
+      }
+    }
+    .hasBorder {
+      border: 4px solid #ffcc00;
+    }
+    .childinfo {
+      border-bottom: 1px solid #ffcc00;
+      font-size: 28rpx;
+      color: #ffcc00;
+      margin-left: 556rpx;
+      margin-top: 40rpx;
+      display: inline-block;
+    }
+    .btn {
+      display: flex;
+      flex-direction: row;
+      position: absolute;
+      margin-top: 89rpx;
+      margin-left: 112rpx;
+      .btn_cancel {
+        border-radius: 100rpx;
+        background-color: #fff;
+        color: #ffcc00;
+        width: 238rpx;
+        height: 80rpx;
+        line-height: 80rpx;
+        text-align: center;
+      }
+      .btn_confirm {
+        border-radius: 100rpx;
+        background-color: #ffcc00;
+        color: #fff;
+        width: 238rpx;
+        height: 80rpx;
+        margin-left: 50rpx;
+        margin-bottom: 80rpx;
+        line-height: 80rpx;
+        text-align: center;
+      }
+      button:after {
+        border: none;
+      }
+    }
+  }
+
+  .empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    image {
+      width: 122rpx;
+      height: 144rpx;
+      margin-top: 126rpx;
+    }
+    text {
+      margin-top: 44rpx;
+      margin-bottom: 50rpx;
+    }
+  }
+}
+</style>

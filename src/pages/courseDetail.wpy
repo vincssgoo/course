@@ -66,30 +66,43 @@
           </view>
         </view>
         <view class="{{isShow?'list':'hide'}}">
-          <swiper class="{{(length<=5)?'swiper_small':'swiper'}} "
-                  indicator-active-color="{{indicatorActiveColor}}"
-                  indicator-dots="{{indicatorDots}}"
-                  circular="true">
-            <swiper-item v-if="courseData.length<=5">
-              <block wx:for="{{courseData}}"
-                     wx:key="key">
-                <view class="content_date">
-                  <text class="date_item">{{item}}</text>
-                </view>
-              </block>
-            </swiper-item>
-            <swiper-item v-else-if="courseData.length>5"
-                         wx:for="{{totalArr.length}}"
-                         wx:for-index="Index">
-              <block wx:for="{{totalArr[Index]}}"
-                     wx:for-index="index"
-                     wx:key="key">
-                <view class="content_date">
-                  <text class="date_item">{{item}}</text>
-                </view>
-              </block>
-            </swiper-item>
-          </swiper>
+          <view class="{{(length!=0)?'':'none'}}">
+            <swiper class="{{(length<=5)?'swiper_small':'swiper'}} "
+                    indicator-active-color="{{indicatorActiveColor}}"
+                    indicator-dots="{{indicatorDots}}"
+                    circular="true">
+              <swiper-item v-if="courseData.length<=5 && courseData.length>0">
+                <block wx:for="{{courseData}}"
+                       wx:key="key">
+                  <view class="content_date">
+                    <text class="date_item">{{item}}</text>
+                  </view>
+                </block>
+              </swiper-item>
+
+              <swiper-item v-else-if="courseData.length>5"
+                           wx:for="{{totalArr.length}}"
+                           wx:for-index="Index">
+                <block wx:for="{{totalArr[Index]}}"
+                       wx:for-index="index"
+                       wx:key="key">
+                  <view class="content_date">
+                    <text class="date_item">{{item}}</text>
+                  </view>
+                </block>
+              </swiper-item>
+            </swiper>
+          </view>
+
+          <view class="{{(length==0)?'':'none'}}">
+            <view class="empty_img">
+              <image src="http://img.mvp45.com/nocourse@3x.png"
+                     mode="scaleToFill"
+                     lazy-load="false">
+              </image>
+              <text>暂无排课</text>
+            </view>
+          </view>
         </view>
 
         <view class="line"></view>
@@ -147,21 +160,21 @@
         </view>
         <view class="btn_img">
           <view wx:if="{{list.enroll_status == 'normal'}}">
-            <image src="http://img.mvp45.com/button.png"
+            <!-- <image src="http://img.mvp45.com/button.png"
                    mode="scaleToFill"
                    lazy-load="false"
                    bindtap="showModal">
-            </image>
+            </image> -->
+            <button class="btn_now"
+                    bindtap="showModal">立即报名</button>
           </view>
           <view wx:elif="{{list.enroll_status == 'late'}}">
-            <image src="http://img.mvp45.com/button_default.png"></image>
+            <button class="btn_early">缴费时间已过</button>
           </view>
           <view wx:elif="{{list.enroll_status == 'early'}}">
-            <image src="http://img.mvp45.com/button_early.png"></image>
+            <button class="btn_early">报名未开始</button>
           </view>
-          <view wx:elif="{{list.enroll_status == 'have_paid'}}">
-            <image src="http://img.mvp45.com/button_paid.png"></image>
-          </view>
+
         </view>
       </view>
     </view>
@@ -170,22 +183,18 @@
       <view class="modal_content">
         <text>是否确认报名?</text>
         <view class="content_btn">
-          <!-- <input type="button"
-                 class="btn_cancel"
-                 bindtap="close_mask"
-                 value="取消"></input>
-          <input type="button"
-                 class="btn_confirm"
-                 bindtap="pay"
-                 value="确定"></input> -->
-          <view class="btn_cancel"
+          <!-- <view class="btn_cancel"
                 bindtap="close_mask">
             <text>取消</text>
           </view>
           <view class="btn_confirm"
                 bindtap="pay">
             <text>确定</text>
-          </view>
+          </view> -->
+          <button class="btn_cancel"
+                  bindtap="close_mask">取消</button>
+          <button class="btn_confirm"
+                  bindtap="pay">确定</button>
         </view>
       </view>
     </view>
@@ -225,14 +234,13 @@ export default class extends wepy.page {
     isShow: false,
     currentDate: "",
     calendarDate: [],
-    test: ['2019-12-12'],
     courseData: [],
     newArr: [],
     totalArr: [],
     date: { year: [], month: [], day: [] }
     ,
-    startDate: '2018-01-01',
-    endDate: '2021-01-01',
+    startDate: '2019-01-01',
+    endDate: '2025-01-01',
     id: '',
     list: [],
     content: '',
@@ -288,6 +296,7 @@ export default class extends wepy.page {
     for (let i = 0; i < this.list.course_date.length; i++) {
       this.calendarDate.push(this.list.course_date[i].date)
     }
+
     this.$apply();
   }
   getCourseData () {
@@ -307,7 +316,10 @@ export default class extends wepy.page {
       this.courseData.push(str)
     }
     this.length = this.courseData.length
+    console.log(this.courseData.length);
+
     this.$apply();
+
   }
   methods = {
     backList () {
@@ -340,32 +352,36 @@ export default class extends wepy.page {
     },
     pay () {
       let show_modal = null;
-      api.pay({
-        data: {
-          course_id: this.list.id
-        },
-        method: 'POST',
-      }).then(res => {
-        wepy.requestPayment(res.data).then((res) => {
-          tip.toast('支付成功', 1200)
-          setTimeout(() => {
-            wepy.navigateTo({ url: './myCourse' });
+      // console.log(this.list);
 
-          }, 1200)
-        }).catch(() => {
-          tip.error('支付失败')
-        })
-        this.$apply();
+      wepy.navigateTo({ url: './addChild?course_id=' + this.list.id + '&id=' + this.id });
+
+      // api.pay({
+      //   data: {
+      //     course_id: this.list.id
+      //   },
+      //   method: 'POST',
+      // }).then(res => {
+      //   wepy.requestPayment(res.data).then((res) => {
+      //     tip.toast('支付成功', 1200)
+      //     setTimeout(() => {
+      //       wepy.navigateTo({ url: './myCourse' });
+
+      //     }, 1200)
+      //   }).catch(() => {
+      //     tip.error('支付失败')
+      //   })
+      //   this.$apply();
 
 
 
-      }).catch(err => {
+      // }).catch(err => {
 
-        if (err.code == 40001) {
-          wepy.switchTab({ url: './profile' });
-          wepy.setStorageSync(SHOW_MODAL, 'true')
-        }
-      })
+      //   if (err.code == 40001) {
+      //     wepy.switchTab({ url: './profile' });
+      //     wepy.setStorageSync(SHOW_MODAL, 'true')
+      //   }
+      // })
 
     },
     showModal () {
@@ -403,16 +419,14 @@ export default class extends wepy.page {
   computed = {}
   onLoad (options) {
     this.id = options.id;
-
-
   }
   async onShow () {
     this.courseData = []
     await this.getCourseDetail()
-    await this.getCalendarDate()
-    await this.getCourseData()
-
+    this.getCalendarDate()
+    this.getCourseData()
     this.$broadcast("startRenderCalendar");
+
   }
 }
 </script>
@@ -426,7 +440,6 @@ export default class extends wepy.page {
     margin-top: 38rpx;
     width: 750rpx;
     height: 88rpx;
-    text-align: center;
     image {
       width: 30rpx;
       height: 30rpx;
@@ -438,14 +451,15 @@ export default class extends wepy.page {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-left: -42rpx;
+      margin-left: 32rpx;
       font-size: 34rpx;
       color: #232323;
       font-weight: bold;
       line-height: 88rpx;
-      text-align: left;
+      float: left;
+      // text-align: center;
       display: inline-block;
-      width: 250rpx;
+      width: 450rpx;
     }
   }
   .top {
@@ -654,6 +668,27 @@ export default class extends wepy.page {
             }
           }
         }
+        .empty_img {
+          display: flex;
+          flex-direction: column;
+          margin-top: 38rpx;
+          justify-content: center;
+          align-items: center;
+          image {
+            width: 334rpx;
+            height: 147rpx;
+            display: inline-block;
+          }
+          text {
+            font-size: 28rpx;
+            display: inline-block;
+            margin-top: 8rpx;
+            color: #ffcc00;
+          }
+        }
+        .none {
+          display: none;
+        }
         /* 默认指示点的样式 */
       }
       .hide {
@@ -719,9 +754,7 @@ export default class extends wepy.page {
       }
       .bottom_desc {
         display: inline-block;
-        margin-top: 38rpx;
-        // margin-left: 30rpx;
-        margin-bottom: 198rpx;
+        margin: 38rpx 22rpx 128rpx 22rpx;
         font-size: 28rpx;
         color: #666666;
         image {
@@ -732,10 +765,32 @@ export default class extends wepy.page {
       }
       .btn_img {
         position: fixed;
-        bottom: 0;
-        image {
-          width: 750rpx;
-          height: 198rpx;
+        bottom: 30rpx;
+        left: 30rpx;
+        .btn_now {
+          width: 690rpx;
+          height: 88rpx;
+          background-color: #ffcc00;
+          font-size: 36rpx;
+          color: #fff;
+          font-weight: bold;
+          line-height: 88rpx;
+          text-align: center;
+          border-radius: 100rpx;
+        }
+        .btn_early {
+          width: 690rpx;
+          height: 88rpx;
+          background-color: #cccccc;
+          font-size: 36rpx;
+          color: #ffffff;
+          font-weight: bold;
+          line-height: 88rpx;
+          text-align: center;
+          border-radius: 100rpx;
+        }
+        button:after {
+          border: none;
         }
       }
     }
@@ -758,10 +813,14 @@ export default class extends wepy.page {
     top: 450rpx;
     left: 108rpx;
     z-index: 99;
+    border-radius: 12rpx;
     background-color: #fff;
     .modal_content {
+      height: 100%;
+      width: 100%;
       display: flex;
       flex-direction: column;
+      position: relative;
       text {
         font-size: 36rpx;
         color: #333333;
@@ -772,37 +831,35 @@ export default class extends wepy.page {
       .content_btn {
         display: flex;
         flex-direction: row;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+
         .btn_cancel {
           width: 266rpx;
           height: 114rpx;
-          background-color: #ffffff;
-          border-top: 1rpx solid #cccccc;
-          margin-top: 76rpx;
-
-          text {
-            margin-left: 95rpx;
-            margin-top: 0rpx;
-            color: #ffcc00;
-            font-size: 36rpx;
-            font-weight: bold;
-            display: inline-block;
-            line-height: 114rpx;
-          }
+          background-color: #fff;
+          color: #ffcc00;
+          line-height: 114rpx;
+          text-align: center;
+          font-size: 36rpx;
+          border-radius: 0 0 0 12rpx;
+          border-top: 2px solid #f1f1f1;
+          font-weight: bold;
         }
         .btn_confirm {
-          width: 268rpx;
-          height: 115rpx;
+          width: 267rpx;
+          height: 114rpx;
           background-color: #ffcc00;
-          margin-top: 76rpx;
-          text {
-            margin-top: 0rpx;
-            margin-left: 98rpx;
-            color: #ffffff;
-            font-size: 36rpx;
-            font-weight: bold;
-            display: inline-block;
-            line-height: 114rpx;
-          }
+          color: #fff;
+          line-height: 114rpx;
+          text-align: center;
+          font-size: 36rpx;
+          font-weight: bold;
+          border-radius: 0 0 12rpx 0;
+        }
+        button:after {
+          border: none;
         }
       }
     }

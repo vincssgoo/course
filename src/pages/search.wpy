@@ -148,7 +148,7 @@ export default class Search extends wepy.page {
     that.$apply();
   }
   methods = {
-    goDetail () {
+    goDetail (e) {
       let id = e.currentTarget.dataset.id;
       console.log(id);
 

@@ -89,10 +89,10 @@ export default class Calendar extends wepy.component {
     }
   }
 
-  onLoad () {
+  async onLoad () {
     console.log(this.courseDate);
 
-    this.setCurrentData()
+    await this.setCurrentData()
 
     this.now.year = newDate.getFullYear()
     this.now.month = newDate.getMonth() + 1
@@ -300,7 +300,6 @@ export default class Calendar extends wepy.component {
   setCurrentData () { // 设置当前年月
     this.current.year = new Date(this.currentDate).getFullYear()
     this.current.month = new Date(this.currentDate).getMonth() + 1
-
   }
   setCourseDate () {
     console.log(123123123);

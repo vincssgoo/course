@@ -32,7 +32,7 @@
           </image>
         </view>
         <view class="title">
-          <text>完善个人信息</text>
+          <text>完善孩子信息</text>
         </view>
         <view class='arrow'></view>
       </view>
@@ -130,7 +130,7 @@ export default class extends wepy.page {
       console.log(123);
       console.log(this.userinfo);
       this.info = wepy.getStorageSync(USER_INFO)
-      wepy.navigateTo({ url: './completeProfile?userinfo=' + JSON.stringify(this.info) });
+      wepy.navigateTo({ url: './completeProfile' });
     },
     goMyCourse () {
       console.log(234);

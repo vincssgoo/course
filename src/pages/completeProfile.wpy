@@ -1,70 +1,122 @@
 <template>
   <view class='container'>
-    <view class="box">
-      <view class="content">
-        <view class="title">
-          <text>姓名</text>
-          <input bindinput="bindNameInput"
-                 type="text"
-                 class="title_input"
-                 placeholder="请填写姓名"
-                 placeholder-class="placeholder"
-                 value="{{newInfo.nname}}" />
+    <view wx:if="{{is_empty==false}}"
+          class="boxes">
+      <view class="box"
+            wx:for="{{list}}"
+            wx:for-index="index">
+        <view class="box_content">
+          <image src="../images/cancel.png"
+                 mode="scaleToFill"
+                 lazy-load="false"
+                 bindtap="delete"
+                 data-index="{{index}}">
+          </image>
+          <view class="content">
+
+            <view class="title">
+              <text>姓名</text>
+              <input bindinput="bindNameInput"
+                     data-index="{{index}}"
+                     type="text"
+                     class="title_input"
+                     placeholder="请填写姓名"
+                     placeholder-class="placeholder"
+                     value="{{list[index].name}}" />
+
+            </view>
+            <view class="line"></view>
+          </view>
+          <view class="content">
+            <view class="title">
+              <text>电话</text>
+              <input bindinput="bindPhoneInput"
+                     data-index="{{index}}"
+                     type="text"
+                     class="title_input"
+                     placeholder="请填写电话号码"
+                     placeholder-class="placeholder"
+                     value="{{list[index].phone}}" />
+            </view>
+            <view class="line"></view>
+          </view>
+          <view class="content">
+            <view class="title">
+              <text>学校</text>
+              <picker bindchange="selectTap"
+                      data-index="{{index}}"
+                      value="{{index2}}"
+                      range="{{school}}"
+                      class="picker_content">
+                <view class="picker">
+                  <!-- <text >{{isShow2?school[index2]:''}}</text> -->
+                  <input disabled="true"
+                         type="text"
+                         class="title_input"
+                         placeholder="请选择学校"
+                         placeholder-class="placeholder"
+                         value="{{isShow2[index]?list[index].newSchoolName:schoolName[index]}}" />
+                  <!-- <text wx:if="item.school_id"></text> -->
+                </view>
+              </picker>
+            </view>
+            <view class="line"></view>
+          </view>
+          <view class="content">
+            <view class="title">
+              <text>班级</text>
+              <picker bindchange="selectTap2"
+                      data-index="{{index}}"
+                      value="{{index}}"
+                      range="{{class}}"
+                      class="picker_content">
+                <view class="picker">
+                  <!-- <text >{{isShow2?school[index2]:''}}</text> -->
+                  <input disabled="true"
+                         type="text"
+                         class="title_input"
+                         placeholder="请选择班级"
+                         placeholder-class="placeholder"
+                         value="{{isShow[index]?list[index].newClassName:className[index]}}" />
+                </view>
+              </picker>
+            </view>
+            <view class="line"></view>
+          </view>
+          <view class="content">
+            <view class="title">
+              <text>身份证号</text>
+              <input bindinput="bindIdInput"
+                     data-index="{{index}}"
+                     type="text"
+                     class="title_input"
+                     placeholder="请填写身份证号码"
+                     placeholder-class="placeholder"
+                     value="{{list[index].id_card_number}}" />
+            </view>
+          </view>
         </view>
-        <view class="line"></view>
       </view>
-      <view class="content">
-        <view class="title">
-          <text>电话</text>
-          <input bindinput="bindPhoneInput"
-                 type="text"
-                 class="title_input"
-                 placeholder="请填写电话号码"
-                 placeholder-class="placeholder"
-                 value="{{newInfo.nphone}}" />
+
+      <view class="bottom">
+        <view class="btn">
+          <button class="add"
+                  bindtap="addElement">添加</button>
+          <button class="save"
+                  bindtap="postUserInfo">保存</button>
         </view>
-        <view class="line"></view>
-      </view>
-      <view class="content">
-        <view class="title">
-          <text>学校</text>
-          <input bindinput="bindSchoolInput"
-                 type="text"
-                 class="title_input"
-                 placeholder="请填写学校名称"
-                 placeholder-class="placeholder"
-                 value="{{newInfo.nschool}}" />
-        </view>
-        <view class="line"></view>
-      </view>
-      <view class="content">
-        <view class="title">
-          <text>班级</text>
-          <input bindinput="bindClassInput"
-                 type="text"
-                 class="title_input"
-                 placeholder="请填写班级"
-                 placeholder-class="placeholder"
-                 value="{{newInfo.nclass}}" />
-        </view>
-        <view class="line"></view>
-      </view>
-      <view class="content">
-        <view class="title">
-          <text>身份证号</text>
-          <input bindinput="bindIdInput"
-                 type="text"
-                 class="title_input"
-                 placeholder="请填写身份证号码"
-                 placeholder-class="placeholder"
-                 value="{{newInfo.nid_number}}" />
-        </view>
+
+        <text>温馨提示：请填写真实有效的信息，以便学校联系。</text>
       </view>
     </view>
-    <view class="bottom">
-      <button class="btn"
-              bindtap="postUserInfo">提交</button>
-      <text>温馨提示：请填写真实有效的信息，以便学校联系。</text>
+    <view wx:elif="{{is_empty==true}}"
+          class="empty"
+          bindtap="clearEmpty">
+      <image src="../images/add.png"
+             mode="scaleToFill"
+             lazy-load="false">
+      </image>
+      <text>添加小孩信息</text>
     </view>
   </view>
 
@@ -79,171 +131,407 @@ import {
 } from '../utils/constant';
 export default class extends wepy.page {
   config = {
-    navigationBarTitleText: '完善个人信息',
+    navigationBarTitleText: '完善孩子信息',
   }
   props = {}
   data = {
+    isShow2: [...false],
+    isShow: [...false],
+    index2: 0,
+    index: 0,
+    is_empty: false,
     list1: null,
     list: null,
     name: '',
-    school: '',
-    class: '',
+    school: [],
+    schoolList: null,
+    classList: null,
+    schoolName: [],
+    newSchoolName: null,
+    newClassName: null,
+    className: [],
+    class: [],
     id_number: '',
     phone: '',
+    children_info: [],
     newInfo: {
-      nname: '',
-      nphone: '',
-      nschool: '',
-      nclass: '',
-      nid_number: '',
-    }
+      nname: null,
+      nphone: null,
+      nschool: null,
+      nclass: null,
+      nid_card_number: null,
+    },
+    newList: [],
+    flag: 1
   }
   components = {}
-  async getUserinfo () {
-    let json = await api.getUserInfo({
-
-    })
-    console.log(json.data);
-
-    if (json.code == 0) {
-      this.list1 = json.data
+  watch = {
+    is_empty (newVal) {
+      this.is_empty = newVal
     }
-    return json
   }
   methods = {
+    delete (e) {
+      let dex = e.currentTarget.dataset.index
+      this.list.splice(dex, 1)
+    },
+    addElement () {
+      this.list.push({ name: '', phone: '', school_id: '', class_id: '', id_card_number: '' })
+      // console.log(this.newInfo);
+
+      // this.newList.push(this.newInfo)
+      // this.newInfo = {
+      //   nname: null,
+      //   nphone: null,
+      //   nschool: null,
+      //   nclass: null,
+      //   nid_card_number: null,
+      // },
+      // this.getChildInfo()
+      this.$apply()
+    },
+    async selectTap (e) {
+      let dex = e.currentTarget.dataset.index
+      // console.log(dex);
+
+      this.index2 = e.detail.value
+      this.isShow2[dex] = true
+      this.list[dex].newSchoolName = this.school[this.index2]
+      this.list[dex].school_id = this.schoolList[this.index2].id
+      await this.getSchoolList()
+      if (this.schoolName[dex - 1] !== this.school[this.index2]) {
+        this.list[dex].newClassName = []
+        this.className[dex] = []
+      }
+      this.getClassName(this.schoolList[this.index2].id)
+      this.$apply();
+    },
+    selectTap2 (e) {
+      let dex = e.currentTarget.dataset.index
+      this.index = e.detail.value
+      this.isShow[dex] = true
+      this.list[dex].newClassName = this.class[this.index]
+      this.$apply();
+    },
+    clearEmpty () {
+      this.is_empty = false;
+    },
     async postUserInfo () {
+
+      for (let i = 0; i < this.list.length; i++) {
+        for (let k = 0; k < this.schoolList.length; k++) {
+          if (this.list[i].newSchoolName == this.schoolList[k].name) {
+            this.list[i].school_id = this.schoolList[k].id
+          }
+        }
+      }
+      for (let i = 0; i < this.list.length; i++) {
+        for (let k = 0; k < this.classList.length; k++) {
+          if (this.list[i].newClassName == this.classList[k].name) {
+            this.list[i].class_id = (this.classList[k].id)
+          }
+        }
+      }
+      // console.log(this.list);
       let json = await api.completeProfile({
         data: {
-          name: this.newInfo.nname,
-          phone: this.newInfo.nphone,
-          school: this.newInfo.nschool,
-          class: this.newInfo.nclass,
-          id_card_number: this.newInfo.nid_number
+          children_info: this.list
         },
         method: 'POST',
       }).then(res => {
         tip.success('提交成功', 1200);
-        wepy.removeStorageSync(USER_INFO);
-        api.getUserInfo({
-
-        }).then(res => {
-          console.log(res);
-          wepy.setStorageSync(USER_INFO, res.data)
-        })
         setTimeout(() => {
-          wepy.switchTab({ url: './home' });
-        }, 1000)
+          wepy.navigateBack({
+            delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+          });
+        }, 1200)
 
-        wepy.removeStorageSync(SHOW_MODAL);
+
       })
+
+      console.log(this.list);
 
 
     },
     bindNameInput (e) {
-      this.newInfo.nname = e.detail.value;
+      // this.newInfo.nname = e.detail.value;
+      let dex = e.currentTarget.dataset.index
+      this.list[dex].name = e.detail.value
     },
     bindPhoneInput (e) {
-      this.newInfo.nphone = e.detail.value;
-    },
-    bindSchoolInput (e) {
-      this.newInfo.nschool = e.detail.value;
-    },
-    bindClassInput (e) {
-      this.newInfo.nclass = e.detail.value;
+      let dex = e.currentTarget.dataset.index
+      this.list[dex].phone = e.detail.value
+      // this.newInfo.nphone = e.detail.value;
     },
     bindIdInput (e) {
-      this.newInfo.nid_number = e.detail.value;
+      // this.newInfo.nid_card_number = e.detail.value;
+      let dex = e.currentTarget.dataset.index
+      this.list[dex].id_card_number = e.detail.value
     },
+  }
+  async getSchoolList () {
+    this.schoolName = [];
+    this.school = [];
+    let json2 = await api.getSchoolList({
+      data: {
+        keyword: ''
+      }
+    });
+    if (json2.code == 0) {
+      this.schoolList = json2.data.data;
+      // console.log(this.schoolList);
+
+    } else {
+      tip.error(json2.data.msg);
+    }
+    for (let i = 0; i < this.list.length; i++) {
+      for (let k = 0; k < this.schoolList.length; k++) {
+        if (this.list[i].school_id == this.schoolList[k].id) {
+          this.schoolName.push(this.schoolList[k].name)
+        }
+      }
+    }
+    console.log(this.schoolName);
+
+    for (let j = 0; j < this.schoolList.length; j++) {
+      this.school.push(this.schoolList[j].name)
+    }
+    this.$apply();
+  }
+  getClassName (id) {
+    this.class = []
+    for (let j = 0; j < this.classList.length; j++) {
+      if (id == this.classList[j].school_id) {
+        this.class.splice(0, 0, this.classList[j].name)
+      }
+
+    }
+  }
+  async getClassList () {
+    let json2 = await api.getClassList({
+      data: {
+        keyword: ''
+      }
+    });
+    if (json2.code == 0) {
+      this.classList = json2.data.data;
+    } else {
+      tip.error(json2.data.msg);
+    }
+    for (let i = 0; i < this.list.length; i++) {
+      for (let k = 0; k < this.classList.length; k++) {
+        if (this.list[i].class_id == this.classList[k].id) {
+          this.className.push(this.classList[k].name)
+        }
+      }
+    }
+    // console.log(this.schoolList);
+    // console.log(this.classList);
+
+    for (let i = 0; i < this.list.length; i++) {
+      for (let k = 0; k < this.classList.length; k++) {
+        if (this.list[i].school_id == this.classList[k].school_id) {
+          this.class.splice(0, 0, this.classList[k].name)
+        }
+      }
+    }
+
+    this.$apply();
+  }
+  async getChildInfo () {
+    let json2 = await api.getChildInfo({
+    })
+    if (json2.code == 0) {
+      this.list = json2.data
+      this.length = this.list.length
+    } else {
+      tip.error(json2.data.msg);
+    }
+    // console.log(this.list);
+
+    if (this.flag == 0) {
+      if (this.list.length == 0) {
+        //暂无数据
+        this.is_empty = true;
+      }
+      else {
+        this.is_empty = false;
+      }
+    }
+    else if (this.flag == 1) {
+      this.is_empty = false;
+    }
+
+    this.$apply()
   }
   events = {}
   watch = {
   }
   computed = {}
   onLoad (options) {
-    this.list = JSON.parse(options.userinfo)
-    this.newInfo.nname = this.list.name
-    this.newInfo.nphone = this.list.phone
-    this.newInfo.nschool = this.list.school
-    this.newInfo.nclass = this.list.class
-    this.newInfo.nid_number = this.list.id_card_number
+    console.log(options);
+
+    if (options.is_empty) {
+      this.is_empty = options.is_empty
+      this.flag = 1
+    }
+    else {
+      this.flag = 0
+    }
+    // console.log(this.is_empty);
+
+    this.$apply();
+
   }
-  onShow () {
+  async onShow () {
+    tip.loading()
+
+    await this.getChildInfo();
+    this.getSchoolList()
+    this.getClassList()
+    tip.loaded()
   }
 }
 </script>
 
 <style lang='scss' >
-.container {
+page {
   background-color: #f6f7fb;
-  width: 750rpx;
-  height: 1206rpx;
-  position: relative;
-  .box {
-    width: 690rpx;
-    height: 475rpx;
-    position: absolute;
-    z-index: 2;
-    background-color: #fff;
-    margin-top: 30rpx;
-    margin-right: 26rpx;
-    margin-left: 34rpx;
-    .content {
-      .title {
-        display: flex;
-        flex-direction: row;
-        margin-left: 30rpx;
-        margin-top: 30rpx;
-        text {
-          font-size: 32rpx;
-          color: #333333;
-          font-weight: bold;
+}
+.container {
+  // position: relative;
+  .boxes {
+    position: relative;
+    .box {
+      width: 690rpx;
+      height: 475rpx;
+      // position: absolute;
+      // z-index: 2;
+      background-color: #fff;
+      margin-top: 30rpx;
+      margin-right: 26rpx;
+      margin-left: 34rpx;
+      .box_content {
+        position: relative;
+        image {
+          width: 70rpx;
+          height: 70rpx;
+          // float: right;
+          // transform: translate(160rpx, -30rpx);
+          position: absolute;
+          right: 0rpx;
+          top: -30rpx;
         }
-        .title_input {
-          font-size: 32rpx;
-          color: #333333;
-          font-weight: bold;
-          margin-left: 36rpx;
-        }
-        .placeholder {
-          font-size: 28rpx;
-          color: #dcdcdc;
-          font-weight: normal;
+        .content {
+          .title {
+            display: flex;
+            flex-direction: row;
+            margin-left: 30rpx;
+            // margin-top: 30rpx;
+
+            text {
+              font-size: 32rpx;
+              color: #333333;
+              display: inline-block;
+              font-weight: bold;
+              margin-top: 30rpx;
+            }
+            .title_input {
+              font-size: 32rpx;
+              color: #333333;
+              font-weight: bold;
+              margin-left: 36rpx;
+              margin-top: 30rpx;
+            }
+            .placeholder {
+              font-size: 28rpx;
+              color: #dcdcdc;
+              font-weight: normal;
+            }
+            .picker_content {
+              .picker {
+                // width: 200rpx;
+                // color: #cccccc;
+                // font-size: 32rpx;
+                text {
+                  // margin-top: 17rpx;
+                  margin-top: 4rpx;
+                  margin-left: 30rpx;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  width: 200rpx;
+                  height: 44rpx;
+                  display: inline-block;
+                }
+              }
+            }
+          }
+          .line {
+            border-bottom: 1px solid #f1f1f1;
+            margin-top: 20rpx;
+            margin-left: 30rpx;
+            margin-right: 30rpx;
+          }
         }
       }
-      .line {
-        border-bottom: 1px solid #f1f1f1;
-        margin-top: 20rpx;
-        margin-left: 30rpx;
-        margin-right: 30rpx;
+    }
+
+    .bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .btn {
+        display: flex;
+        flex-direction: row;
+        margin-top: 60rpx;
+        .add {
+          width: 250rpx;
+          height: 88rpx;
+          border-radius: 100rpx;
+          background-color: #fff;
+          font-size: 36rpx;
+          color: #ffcc00;
+          font-weight: bold;
+        }
+        .save {
+          // position: absolute;
+          // top: 540rpx;
+          margin-left: 50rpx;
+          width: 250rpx;
+          height: 88rpx;
+          border-radius: 100rpx;
+          background-color: #ffcc00;
+          font-size: 36rpx;
+          color: #ffffff;
+          font-weight: bold;
+        }
+      }
+
+      button::after {
+        border: none;
+      }
+      text {
+        font-size: 24rpx;
+        color: #333333;
+        margin-top: 54rpx;
       }
     }
   }
 
-  .bottom {
+  .empty {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-
-    .btn {
-      position: absolute;
-      top: 540rpx;
-      margin-top: 60rpx;
-      width: 250rpx;
-      height: 88rpx;
-      border-radius: 100rpx;
-      background-color: #ffcc00;
-      font-size: 36rpx;
-      color: #ffffff;
-      font-weight: bold;
-    }
-    button::after {
-      border: none;
+    image {
+      width: 122rpx;
+      height: 144rpx;
+      margin-top: 126rpx;
     }
     text {
-      font-size: 24rpx;
-      color: #333333;
-      position: absolute;
-      top: 712rpx;
+      margin-top: 44rpx;
+      margin-bottom: 50rpx;
     }
   }
 }

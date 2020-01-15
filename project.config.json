@@ -20,7 +20,7 @@
 		}
 	},
 	"compileType": "miniprogram",
-	"appid": "wxe0020a7b519d4e5d",
+	"appid": "wx6bac5fc5656c1edd",
 	"projectname": "abcourse",
 	"miniprogramRoot": "dist/",
 	"simulatorType": "wechat",
@@ -67,6 +67,20 @@
 					"id": -1,
 					"name": "profile",
 					"pathName": "pages/profile",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "completeProfile",
+					"pathName": "pages/completeProfile",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "site",
+					"pathName": "pages/site",
 					"scene": null
 				}
 			]

@@ -703,9 +703,7 @@ export default class extends wepy.page {
       }
       .bottom_desc {
         display: inline-block;
-        margin-top: 38rpx;
-        // margin-left: 30rpx;
-        margin-bottom: 198rpx;
+        margin: 38rpx 22rpx 88rpx 22rpx;
         font-size: 28rpx;
         color: #666666;
         image {

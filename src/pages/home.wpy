@@ -141,7 +141,7 @@ export default class extends wepy.page {
       wepy.navigateTo({ url: './search' });
     },
     goSignup () {
-      wepy.navigateTo({ url: './signup' });
+      wepy.navigateTo({ url: './site' });
     },
     goNotes () {
       wepy.navigateTo({ url: './notes' });
@@ -182,7 +182,6 @@ export default class extends wepy.page {
   async onShow () {
     this.token = wepy.getStorageSync(USER_TOKEN) || null;
     console.log(this.token);
-    tip.loading('请求中');
     const json = await api.getBanner({
     });
     if (json.code == 0) {
@@ -195,7 +194,6 @@ export default class extends wepy.page {
         key: "notice"
       }
     });
-    tip.loaded()
     if (json1.code == 0) {
       this.list = json1;
     } else {

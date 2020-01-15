@@ -23,8 +23,10 @@ const typeList = (params) => requestNoLoading(params, host + '/api/backend/cours
 const getCourseDetail = (params) => request(params, host + '/api/frontend/course/detail');
 const completeProfile = (params) => request(params, host + '/api/frontend/user/updateInfo');
 const pay = (params) => request(params, host + '/api/frontend/courseOrder/pay');
-const getMyCourse = (params) => request(params, host + '/api/frontend/user/paidCourse');
-
+const getMyCourse = (params) => requestNoLoading(params, host + '/api/frontend/user/paidCourse');
+const getChildInfo = (params) => requestNoLoading(params, host + '/api/frontend/user/info');
+const getSchoolList = (params) => requestNoLoading(params, host + '/api/backend/school/index');
+const getClassList = (params) => requestNoLoading(params, host + '/api/backend/classes/index');
 module.exports = {
 
   login,
@@ -39,5 +41,8 @@ module.exports = {
   getCourseDetail,
   completeProfile,
   pay,
-  getMyCourse
+  getMyCourse,
+  getChildInfo,
+  getSchoolList,
+  getClassList
 }
