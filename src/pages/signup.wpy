@@ -171,15 +171,17 @@ export default class extends wepy.page {
       }
       console.log(this.site_id);
 
-      this.$apply();
+
       tip.loading('请求中');
       this.no_more = false;
       this.showMessage = '';
-
+      this.is_empty = null;
       this.list = [];
       this.currentPage = 1
       this.getList()
       tip.loaded()
+
+      this.$apply();
     },
 
     selectTap2 (e) {
@@ -198,99 +200,72 @@ export default class extends wepy.page {
       }
       console.log(this.type_id);
 
-      this.$apply();
+
       tip.loading('请求中');
       this.no_more = false;
       this.showMessage = '';
-
+      this.is_empty = null;
       this.list = [];
       this.currentPage = 1
       this.getList()
       tip.loaded()
+
+      this.$apply();
     },
-    // 点击下拉列表
-    // optionTap2 (e) {
-    //   let Index = e.currentTarget.dataset.index;//获取点击的下拉列表的下标
-    //   this.index2 = Index;
-    //   this.show2 = !this.data.show2,
-    //     this.isShow2 = true,
-    //     this.type_id = this.typeList.data[this.index2].id,
-    //     this.$apply();
-    //   this.onShow()
-    // },
+
   }
-  async getList (currentPage, refresh) {
-    let that = this;
-    const json = await api.courseList({
+  async getList () {
+    // let that = this;
+    const res = await api.courseList({
       data: {
-        page: currentPage || 1,
+        page: this.currentPage,
         limit: 10,
-        site_id: that.site_id,
-        type_id: that.type_id,
-        keyword: that.keyword,
-      }
+        site_id: this.site_id,
+        type_id: this.type_id,
+        keyword: this.keyword,
+      },
     });
-    // console.log(json.total);
+    if (res.code == 0) {
+      if (res.data.data.length == 0) {
+        if (this.list.length == 0) {
+          this.showLoading = false
+          this.showMessage = ''
+          this.is_empty = true;
+        } else {
+          this.showLoading = false
+          this.showMessage = '没有更多了'
 
-    if (json.code == 0) {
-      // let content = json.data.data;
-      // that.list = json.data.data;
-      that.total = json.data.total
-      // that.list = that.list.concat(content)
-      if (refresh) {
-        that.list = json.data.data
-      }
-      else {
-        that.list = [...that.list, ...json.data.data];
-      }
-
-      console.log(that.list);
-      if (json.data.data.page == 1 && that.list.length == 0) {
-        //暂无数据
-        that.is_empty = true;
+          // tip.noData()
+        }
       } else {
-        that.is_empty = false;
+        this.showLoading = false
+        this.is_empty = false;
+        this.list.push(...res.data.data)
       }
-      if (currentPage * 10 >= that.total) {
-        console.log("无更多")
-        that.no_more = true
-      }
-
     }
-    that.showLoading = false;
+    console.log(this.list);
+
     this.$apply()
   }
   events = {}
   onReachBottom () {
-    console.log("加载更多");
-    let that = this;
-    that.showLoading = true;
-    //判断是否还有更多数据
-    if (!that.no_more) {
-      //防止重复加载
-      console.log(123123);
-
-      that.showMessage = '正在加载'
-      that.currentPage++;
-      setTimeout(() => {
-        that.getList(that.currentPage, false);
-      }, 500);
-
-    } else {
-      that.showLoading = false;
-      that.showMessage = '没有更多啦'
-    }
+    this.showLoading = true
+    this.showMessage = '正在加载'
+    this.currentPage += 1
+    this.getList()
   }
   onPullDownRefresh () {
     console.log('onPullDownRefresh')
     this.showRefresh = true;
     this.currentPage = 1
     this.no_more = false
-    this.showMessage1 = '正在刷新'
-    setTimeout(() => {
-      this.getList(this.currentPage, true);
-    }, 500);
-    this.showMessage1 = ''
+    this.showMessage = '';
+    this.list = [];
+    this.currentPage = 1
+    // setTimeout(() => {
+
+    // }, 500);
+    this.getList(this.currentPage, true);
     this.showRefresh = false;
     wepy.stopPullDownRefresh()
   }

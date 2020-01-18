@@ -86,6 +86,9 @@ const requestNoLoading = async (param = {}, url) => {
       ...param.header
     }
   }
+  if (param.loading) {
+    tip.loading(param.loading);
+  }
   // 发起请求
   let response = await wepy.request({
     url: url,

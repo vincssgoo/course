@@ -78,7 +78,12 @@ export default class Tips {
       duration: 1500
     });
   }
-
+  static noData(title) {
+    wx.showToast({
+      title: "下面没有了",
+      icon: "none",
+    })
+  }
   /**
    * 错误框
    */
@@ -98,7 +103,7 @@ export default class Tips {
   //   }
   // }
 
-  static error(title, duration=1500) {
+  static error(title, duration = 1500) {
     wx.showToast({
       title: title,
       icon: "none",
@@ -136,7 +141,7 @@ export default class Tips {
       title: title,
       path: url,
       desc: desc,
-      success: function(res) {
+      success: function (res) {
         Tips.toast("分享成功");
       }
     };
