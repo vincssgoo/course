@@ -7,7 +7,6 @@ import {
   USER_INFO
 } from '../utils/constant';
 export const base_url = 'https://abcourse.mvp45.com'
-// export const base_url = 'https://huiyi.mvp45.com'
 const API_SECRET_KEY = 'https://abcourse.mvp45.com'
 const TIMESTAMP = util.getCurrentTime()
 const SIGN = md5.hex_md5((TIMESTAMP + API_SECRET_KEY).toLowerCase())

@@ -330,10 +330,10 @@ export default class extends wepy.page {
     },
     getLocation: function () {
       console.log(this.list.latitude);
-
+      console.log(this.list.longitude);
       wepy.openLocation({//​使用微信内置地图查看位置。
-        latitude: parseInt(this.latitude),//要去的纬度-地址
-        longitude: parseInt(this.longitude),//要去的经度-地址
+        latitude: parseFloat(this.latitude),//要去的纬度-地址
+        longitude: parseFloat(this.longitude),//要去的经度-地址
       })
     },
     makeCall () {
@@ -490,6 +490,7 @@ export default class extends wepy.page {
         flex-direction: row;
         margin-top: 30rpx;
         margin-left: 30rpx;
+        align-items: center;
         .top_decoration {
           width: 10rpx;
           height: 50rpx;
@@ -497,6 +498,10 @@ export default class extends wepy.page {
         }
         .top_title {
           margin-left: 30rpx;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          width: 500rpx;
           text {
             font-size: 36rpx;
             color: #222222;
@@ -507,7 +512,7 @@ export default class extends wepy.page {
           position: absolute;
           right: 60rpx;
           text {
-            font-size: 40rpx;
+            font-size: 38rpx;
             color: #e80020;
             font-weight: bold;
           }
