@@ -7,7 +7,9 @@ import {
 // const host = 'http://weiwo.mvp45.com'
 // const host = 'http://weiwo.com'
 // const host = 'https://market.dachaohui.cn'
-const host = 'https://abcourse.mvp45.com'
+// const host = 'https://abcourse.mvp45.com'
+const host = 'https://api.xgqszx.com'
+
 //const apiMall = 'https://api.tangxinmao.com'
 
 // 用户

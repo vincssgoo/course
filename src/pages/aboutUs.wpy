@@ -63,15 +63,15 @@ page {
   background-color: #f6f7fb;
 }
 .container {
-  width: 750rpx;
-  height: 100%;
+  // width: 750rpx;
+  // height: 100%;
   .content_box {
-    background-color: #f6f7fb;
-    width: 750rpx;
-    height: 1198rpx;
+    // background-color: #f6f7fb;
+    // width: 750rpx;
+    height: 100%;
     .box {
       width: 690rpx;
-      height: calc(100vh - 80rpx);
+      // height: 100%;
       background-color: #fff;
       position: absolute;
       z-index: 2;
