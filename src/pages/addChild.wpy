@@ -37,24 +37,22 @@
         <view class="content">
           <view class="title">
             <text>学校</text>
-            <!-- <input bindinput="bindSchoolInput"
-                   type="text"
-                   class="title_input"
-                   placeholder="请填写学校名称"
-                   placeholder-class="placeholder"
-                   value="{{list[0].school}}" /> -->
-            <!-- <picker bindchange="selectTap"
-                    value="{{index2}}"
-                    range="{{array2}}"
-                    class="picker_content">
-              <view class="picker">
-                <text>{{isShow2?array2[index2]:'请选择学校'}}</text>
-              </view>
-            </picker> -->
             <input value="{{school[index]}}"
                    disabled="true"
                    class="title_input"
                    placeholder="请填写学校名称"
+                   placeholder-class="placeholder"
+                   type="text" />
+          </view>
+          <view class="line"></view>
+        </view>
+        <view class="content">
+          <view class="title">
+            <text>年级</text>
+            <input value="{{grade[index]}}"
+                   disabled="true"
+                   class="title_input"
+                   placeholder="请填写年级名称"
                    placeholder-class="placeholder"
                    type="text" />
           </view>
@@ -126,8 +124,10 @@ export default class extends wepy.page {
     keyword: '',
     schoolList: null,
     classList: null,
+    gradeList: null,
     school: [],
     class: [],
+    grade: [],
     length: null,
     children_id: null,
     course_id: null,
@@ -243,6 +243,28 @@ export default class extends wepy.page {
     // }
     // console.log(this.array2);
   }
+
+  async getGradeList () {
+    let json2 = await api.getGradeList({
+      data: {
+        keyword: ''
+      }
+    });
+    if (json2.code == 0) {
+      this.gradeList = json2.data.data;
+    } else {
+      tip.error(json2.data.msg);
+    }
+    for (let i = 0; i < this.list.length; i++) {
+      for (let j = 0; j < this.gradeList.length; j++) {
+        if (this.list[i].grade_id == this.gradeList[j].id) {
+          this.grade.splice(i, 1, this.gradeList[j].name)
+        }
+      }
+
+    }
+    this.$apply();
+  }
   async getClassList () {
     let json2 = await api.getClassList({
       data: {
@@ -250,7 +272,7 @@ export default class extends wepy.page {
       }
     });
     if (json2.code == 0) {
-      this.classList = json2.data.data;
+      this.classList = json2.data;
     } else {
       tip.error(json2.data.msg);
     }
@@ -300,6 +322,7 @@ export default class extends wepy.page {
     tip.loading();
     await this.getChildInfo();
     this.getSchoolList();
+    this.getGradeList();
     this.getClassList();
     tip.loaded();
   }
@@ -315,7 +338,7 @@ page {
     position: relative;
     .box {
       width: 690rpx;
-      height: 475rpx;
+      height: 580rpx;
       // position: absolute;
       // z-index: 2;
       background-color: #fff;

@@ -1,7 +1,8 @@
 <template>
   <view class='container'>
     <view class="top">
-      <view class="topTitle">
+      <view class="topTitle"
+            style="top:{{message.safeArea.top + 6}}px">
         <text>个人中心</text>
       </view>
       <view class="bg">
@@ -114,6 +115,7 @@ export default class extends wepy.page {
     showModal: false,
     userinfo: [],
     info: [],
+    message: null,
   }
   components = {}
   methods = {
@@ -147,7 +149,10 @@ export default class extends wepy.page {
   onLoad () {
 
   }
-  onShow () {
+  async onShow () {
+    this.message = await wepy.getSystemInfo()
+    console.log(this.message);
+
     this.userinfo = wepy.getStorageSync(USER_INFO) || null;
     if (this.userinfo == null) {
       wepy.navigateTo({ url: './login' });
@@ -188,9 +193,12 @@ page {
     .topTitle {
       position: absolute;
       z-index: 2;
+      // top: 60rpx;
+      // left: 308rpx;
+      // right: 306rpx;
       top: 60rpx;
-      left: 308rpx;
-      right: 306rpx;
+      left: 50%;
+      transform: translate(-50%, 0);
       text {
         font-size: 34rpx;
         color: #ffffff;

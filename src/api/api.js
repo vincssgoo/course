@@ -29,6 +29,8 @@ const getMyCourse = (params) => requestNoLoading(params, host + '/api/frontend/u
 const getChildInfo = (params) => requestNoLoading(params, host + '/api/frontend/user/info');
 const getSchoolList = (params) => requestNoLoading(params, host + '/api/backend/school/index');
 const getClassList = (params) => requestNoLoading(params, host + '/api/backend/classes/index');
+const getGradeList = (params) => requestNoLoading(params, host + '/api/backend/grade/index');
+
 module.exports = {
 
   login,
@@ -46,5 +48,6 @@ module.exports = {
   getMyCourse,
   getChildInfo,
   getSchoolList,
-  getClassList
+  getClassList,
+  getGradeList,
 }
